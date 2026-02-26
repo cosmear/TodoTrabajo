@@ -115,7 +115,7 @@
                     class="text-sm font-bold text-slate-300 hover:text-primary transition-colors">
                     Iniciar Sesión
                 </button>
-                <button
+                <button onclick="document.getElementById('register-modal').classList.remove('hidden')"
                     class="bg-secondary hover:bg-secondary/90 text-white text-sm font-bold py-2.5 px-6 rounded-lg transition-all shadow-[0_0_15px_rgba(255,107,0,0.4)]">
                     Registrarme
                 </button>
@@ -139,13 +139,13 @@
                         <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">call</span>
                         </div>
-                        <span>+34 900 123 456</span>
+                        <span>+54 11 4321-5678</span>
                     </div>
                     <div class="flex items-center gap-4 text-slate-300">
                         <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">location_on</span>
                         </div>
-                        <span>Calle Principal 123, Madrid</span>
+                        <span>Calle Principal 123, CABA</span>
                     </div>
                 </div>
             </div>
@@ -277,12 +277,76 @@
 
                     <p class="mt-8 text-center text-sm text-slate-400">
                         ¿No tienes una cuenta?
-                        <a href="#" class="text-primary hover:underline font-medium">Regístrate</a>
+                        <a href="#" onclick="document.getElementById('login-modal').classList.add('hidden'); document.getElementById('register-modal').classList.remove('hidden')" class="text-primary hover:underline font-medium">Regístrate</a>
                     </p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-background-dark/80 backdrop-blur-sm transition-opacity"
+            onclick="document.getElementById('register-modal').classList.add('hidden')"></div>
+
+        <!-- Modal Content -->
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div
+                class="relative bg-surface-dark rounded-2xl border border-slate-800 shadow-2xl overflow-hidden transform transition-all sm:max-w-md sm:w-full">
+                <!-- Close Button -->
+                <button onclick="document.getElementById('register-modal').classList.add('hidden')"
+                    class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+
+                <div class="px-8 pt-10 pb-8">
+                    <h3 class="text-2xl font-bold text-white mb-2 text-center">Crear una cuenta</h3>
+                    <p class="text-slate-400 text-sm text-center mb-8">Únete a Todo Trabajo hoy mismo</p>
+
+                    <form class="space-y-4">
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Nombre Completo</label>
+                            <input type="text"
+                                class="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
+                                placeholder="Juan Pérez">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Correo Electrónico</label>
+                            <input type="email"
+                                class="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
+                                placeholder="tu@email.com">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Contraseña</label>
+                            <input type="password"
+                                class="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
+                                placeholder="••••••••">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Tipo de Cuenta</label>
+                            <select
+                                class="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                                <option value="candidato">Soy Candidato (Busco Empleo)</option>
+                                <option value="empresa">Soy Empresa (Busco Empleados)</option>
+                            </select>
+                        </div>
+                        
+                        <button type="button"
+                            class="w-full bg-secondary text-white font-bold py-3 px-4 rounded-lg hover:bg-secondary/90 transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] mt-6">
+                            Registrarme
+                        </button>
+                    </form>
+
+                    <p class="mt-6 text-center text-sm text-slate-400">
+                        ¿Ya tienes una cuenta?
+                        <a href="#" onclick="document.getElementById('register-modal').classList.add('hidden'); document.getElementById('login-modal').classList.remove('hidden')" class="text-primary hover:underline font-medium">Inicia Sesión</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
