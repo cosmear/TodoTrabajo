@@ -255,7 +255,8 @@
                 <!-- Text -->
                 <div class="md:w-1/2 animate-fade-in-up">
                     <h3 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">Un proceso simple
-                        <br>de 3 pasos</h3>
+                        <br>de 3 pasos
+                    </h3>
 
                     <div class="space-y-10 mt-12">
                         <div class="flex gap-6 group">
@@ -291,59 +292,149 @@
                     </div>
                 </div>
                 <!-- Image/Graphic -->
-                <div class="md:w-1/2 relative animate-fade-in-up delay-200">
+                <div class="md:w-1/2 relative animate-fade-in-up delay-[400ms]">
+                    <!-- Phone Container with Hover Rotation -->
                     <div
-                        class="bg-white rounded-[2rem] shadow-2xl p-4 border border-slate-100 max-w-[340px] mx-auto floating transform -rotate-2">
-                        <!-- Mockup Smartphone UI -->
+                        class="relative max-w-[320px] mx-auto floating transform -rotate-3 hover:rotate-0 transition-transform duration-700 ease-out z-10 cursor-pointer group">
+
+                        <!-- Blobs / Glows around phone -->
                         <div
-                            class="bg-slate-50 rounded-[1.5rem] border-8 border-slate-800 h-[550px] w-full overflow-hidden flex flex-col relative shadow-inner">
-                            <!-- Notch -->
-                            <div class="absolute top-0 w-full flex justify-center z-10">
-                                <div class="w-32 h-7 bg-slate-800 rounded-b-3xl"></div>
+                            class="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-green-500/30 rounded-[3rem] blur-2xl -z-10 opacity-70 group-hover:opacity-100 transition-opacity duration-500">
+                        </div>
+
+                        <!-- Phone Frame Metallic Edge -->
+                        <div
+                            class="bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 rounded-[3rem] p-1.5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-600 relative">
+                            <!-- Side Buttons -->
+                            <div class="absolute top-32 -left-1.5 w-1.5 h-12 bg-slate-700 rounded-l-md shadow-inner">
                             </div>
-                            <!-- Header -->
-                            <div
-                                class="bg-slate-200/50 pt-10 pb-4 px-4 border-b border-slate-200 flex items-center gap-3 backdrop-blur-md">
-                                <div
-                                    class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                                    <span class="material-symbols-outlined mb-0">work</span></div>
-                                <div>
-                                    <h5 class="font-bold text-slate-800 text-[15px]">Todo Trabajo - Vacantes</h5>
-                                    <p class="text-xs text-slate-500">Info. del canal</p>
-                                </div>
+                            <div class="absolute top-48 -left-1.5 w-1.5 h-12 bg-slate-700 rounded-l-md shadow-inner">
                             </div>
-                            <!-- Messages -->
+                            <div class="absolute top-32 -right-1.5 w-1.5 h-16 bg-slate-800 rounded-r-md shadow-inner">
+                            </div>
+
+                            <!-- Screen -->
                             <div
-                                class="flex-1 p-4 space-y-4 overflow-hidden relative bg-[url('https://placeholder.pics/svg/100/e2e8f0-f8fafc')] bg-cover">
-                                <div
-                                    class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 w-[90%] left-0 relative animate-fade-in-up">
-                                    <p class="text-sm text-green-600 font-bold mb-1">📢 Nueva Vacante: Administrativo
-                                        CABA</p>
-                                    <p class="text-xs text-slate-600 mb-3 leading-relaxed">Empresa multinacional busca
-                                        administrativo para la zona del centro porteño...</p>
+                                class="bg-[#efeae2] rounded-[2.5rem] h-[600px] w-full overflow-hidden flex flex-col relative shadow-[inset_0_0_15px_rgba(0,0,0,0.2)]">
+
+                                <!-- Dynamic Island / Notch -->
+                                <div class="absolute top-2.5 w-full flex justify-center z-20">
                                     <div
-                                        class="bg-slate-50 rounded-lg p-2 text-xs text-primary font-bold text-center border border-slate-100 hover:bg-slate-100 cursor-pointer">
-                                        Ver oferta y postularme</div>
+                                        class="w-24 h-7 bg-black rounded-full flex items-center justify-between px-2.5 shadow-md">
+                                        <!-- Sensors/Camera -->
+                                        <div
+                                            class="w-2.5 h-2.5 rounded-full bg-slate-800/80 shadow-[inset_0_0_2px_rgba(255,255,255,0.2)]">
+                                        </div>
+                                        <div
+                                            class="w-2.5 h-2.5 rounded-full bg-indigo-900/50 flex items-center justify-center shadow-[inset_0_0_2px_rgba(255,255,255,0.1)]">
+                                            <div class="w-1 h-1 rounded-full bg-white/40 blur-[0.5px]"></div>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <!-- Background Chat Pattern (WhatsApp style) -->
+                                <div class="absolute inset-0 opacity-[0.05] z-0"
+                                    style="background-image: radial-gradient(#008069 1px, transparent 1px); background-size: 15px 15px;">
+                                </div>
+
+                                <!-- WhatsApp Header -->
                                 <div
-                                    class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 w-[90%] left-0 relative animate-fade-in-up delay-100">
-                                    <p class="text-sm text-green-600 font-bold mb-1">📢 Nueva Vacante: Recepcionista</p>
-                                    <p class="text-xs text-slate-600 mb-3 leading-relaxed">Clínica privada en Zona Norte
-                                        busca recepcionista full time...</p>
+                                    class="bg-[#008069] pt-14 pb-3 px-4 flex items-center gap-3 shadow-md relative z-10 text-white">
+                                    <span class="material-symbols-outlined text-white/90">arrow_back</span>
                                     <div
-                                        class="bg-slate-50 rounded-lg p-2 text-xs text-primary font-bold text-center border border-slate-100 hover:bg-slate-100 cursor-pointer">
-                                        Ver oferta y postularme</div>
+                                        class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#008069] font-bold text-xl relative shrink-0 shadow-sm">
+                                        <span class="material-symbols-outlined">work</span>
+                                        <div
+                                            class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-[2px] border-[#008069] rounded-full">
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 overflow-hidden">
+                                        <h5 class="font-bold text-base leading-tight truncate">Todo Trabajo</h5>
+                                        <p class="text-[11px] text-white/80 font-medium">Canal • 15.2k seguidores</p>
+                                    </div>
                                 </div>
-                                <!-- Gradient fade at bottom -->
-                                <div
-                                    class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-50 to-transparent">
+
+                                <!-- Messages List -->
+                                <div class="flex-1 p-4 space-y-4 overflow-y-hidden relative z-10 flex flex-col pt-6">
+                                    <!-- Date Badge -->
+                                    <div class="flex justify-center mb-2">
+                                        <span
+                                            class="bg-white/80 backdrop-blur text-slate-500 text-[11px] font-medium py-1 px-3 rounded-xl shadow-sm border border-black/5">Hoy</span>
+                                    </div>
+
+                                    <!-- Message 1 -->
+                                    <div
+                                        class="bg-white p-3 rounded-2xl rounded-tl-sm shadow-[0_1px_2px_rgba(0,0,0,0.1)] w-[92%] relative">
+                                        <!-- Tail -->
+                                        <div
+                                            class="absolute top-0 -left-2 w-0 h-0 border-t-[0px] border-t-transparent border-r-[12px] border-r-white border-b-[16px] border-b-transparent drop-shadow-sm">
+                                        </div>
+
+                                        <div class="flex items-center gap-1.5 mb-1.5">
+                                            <span
+                                                class="material-symbols-outlined text-[#008069] text-[15px]">campaign</span>
+                                            <p class="text-[13px] text-[#008069] font-bold">Nueva Vacante</p>
+                                        </div>
+                                        <p class="text-[14px] text-slate-800 mb-0 font-bold leading-snug">Administrativo
+                                            CABA</p>
+                                        <p class="text-[13px] text-slate-600 mb-2 leading-relaxed">Empresa multinacional
+                                            busca personal para centro porteño. L a V horario flexible.</p>
+
+                                        <!-- Interactive Button -->
+                                        <div
+                                            class="mt-2 bg-[#f0f2f5] hover:bg-[#e0e2e5] transition-colors rounded-xl p-2 text-center text-[#008069] border border-[#008069]/10 cursor-pointer">
+                                            <p class="text-[12px] font-bold">Ver oferta completa</p>
+                                        </div>
+
+                                        <div class="flex justify-end mt-1">
+                                            <span class="text-[10px] text-slate-400">09:41</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Message 2 -->
+                                    <div
+                                        class="bg-white p-3 rounded-2xl rounded-tl-sm shadow-[0_1px_2px_rgba(0,0,0,0.1)] w-[92%] relative opacity-0 animate-[fadeInUp_0.8s_ease-out_0.8s_forwards]">
+                                        <!-- Tail -->
+                                        <div
+                                            class="absolute top-0 -left-2 w-0 h-0 border-t-[0px] border-t-transparent border-r-[12px] border-r-white border-b-[16px] border-b-transparent drop-shadow-sm">
+                                        </div>
+
+                                        <div class="flex items-center gap-1.5 mb-1.5">
+                                            <span
+                                                class="material-symbols-outlined text-[#008069] text-[15px]">campaign</span>
+                                            <p class="text-[13px] text-[#008069] font-bold">Nueva Vacante</p>
+                                        </div>
+                                        <p class="text-[14px] text-slate-800 mb-0 font-bold leading-snug">Desarrollador
+                                            React SSR</p>
+                                        <p class="text-[13px] text-slate-600 mb-2 leading-relaxed">Se busca dev
+                                            semi-senior. 100% remoto, pago mensual en USD.</p>
+
+                                        <!-- Interactive Button -->
+                                        <div
+                                            class="mt-2 bg-[#f0f2f5] hover:bg-[#e0e2e5] transition-colors rounded-xl p-2 text-center text-[#008069] border border-[#008069]/10 cursor-pointer">
+                                            <p class="text-[12px] font-bold">Postularme ahora</p>
+                                        </div>
+
+                                        <div class="flex justify-end mt-1">
+                                            <span class="text-[10px] text-slate-400">10:15</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Input Bar (footer of the phone) -->
+                                    <div
+                                        class="absolute bottom-0 left-0 w-full bg-[#f0f2f5] px-2 py-2 flex items-center gap-2 border-t border-black/5 z-20">
+                                        <span
+                                            class="material-symbols-outlined text-slate-500 text-xl pl-2 cursor-not-allowed">add</span>
+                                        <div
+                                            class="flex-1 bg-white rounded-full py-2 px-4 shadow-sm border border-slate-200">
+                                            <p class="text-[12px] text-slate-400 truncate">Solo los admins pueden enviar
+                                                mensajes</p>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Decorative elements -->
-                    <div
-                        class="absolute -bottom-10 -right-10 w-40 h-40 bg-[radial-gradient(#94a3b8_2px,transparent_2px)] [background-size:16px_16px] -z-10 rounded-full opacity-50">
                     </div>
                 </div>
             </div>
