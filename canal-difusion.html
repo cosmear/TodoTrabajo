@@ -59,6 +59,57 @@
             box-shadow: 0 0 15px rgba(19, 200, 236, 0.15);
         }
 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+
+        .delay-300 {
+            animation-delay: 300ms;
+        }
+
+        .delay-400 {
+            animation-delay: 400ms;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .floating {
+            animation: floating 4s ease-in-out infinite;
+        }
+
         .curve-separator {
             position: absolute;
             bottom: 0;
@@ -101,9 +152,9 @@
                 <a class="text-sm font-medium text-slate-300 hover:text-primary transition-colors"
                     href="somos.html">Somos</a>
                 <a class="text-sm font-medium text-slate-300 hover:text-primary transition-colors"
-                    href="buscar-empleo.html">Buscar Empleo</a>
+                    href="canal-difusion.html">Canal de Difusión</a>
                 <a class="text-sm font-medium text-slate-300 hover:text-primary transition-colors"
-                    href="buscar-empleado.html">Buscar Empleado</a>
+                    href="buscar-talento.html">Busco Personal</a>
                 <a class="text-sm font-medium text-slate-300 hover:text-primary transition-colors"
                     href="servicios.html">Servicios</a>
                 <a class="text-sm font-medium text-slate-300 hover:text-primary transition-colors"
@@ -121,180 +172,198 @@
                 </button>
             </div>
         </div>
-    </nav><!-- Job Search & Grid Section -->
-    <section class="relative bg-background-light pt-40 pb-24">
-        
-        <div class="max-w-7xl mx-auto px-6 relative z-20">
-            <!-- Floating Search Bar -->
-            <div
-                class="bg-white p-4 rounded-xl shadow-2xl -mt-48 mb-20 flex flex-col md:flex-row gap-4 border border-slate-100 items-center max-w-4xl mx-auto">
-                <div class="flex-1 w-full relative">
-                    <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                    <input
-                        class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                        placeholder="Cargo o palabra clave" type="text" />
+    </nav>
+    <!-- Hero Canal de Difusión -->
+    <section class="relative bg-background-light pt-40 pb-20 overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+            <div class="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-80 h-80 bg-green-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-6 text-center z-20 relative animate-fade-in-up">
+            <div class="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 floating">
+                <span class="material-symbols-outlined text-5xl text-primary">campaign</span>
+            </div>
+            <h2 class="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
+                Sumate a nuestro canal de difusión
+            </h2>
+            <p class="text-xl md:text-2xl text-slate-600 mb-10 font-medium max-w-3xl mx-auto leading-relaxed">
+                Recibí las mejores oportunidades laborales directamente en tu celular. Unirte es gratis, rápido y sin
+                intermediarios.
+            </p>
+            <a href="https://whatsapp.com" target="_blank"
+                class="inline-flex items-center gap-3 bg-green-500 text-white text-xl font-bold py-5 px-12 rounded-2xl hover:bg-green-600 transition-all shadow-[0_0_40px_rgba(34,197,94,0.5)] transform hover:scale-105 hover:-translate-y-1">
+                <span class="material-symbols-outlined text-3xl">forum</span>
+                UNIRME AHORA POR WHATSAPP
+            </a>
+            <p class="mt-6 text-sm text-slate-500 font-medium">Únete a cientos de profesionales que ya consiguieron
+                trabajo.</p>
+        </div>
+    </section>
+
+    <!-- Beneficios -->
+    <section class="py-24 bg-white relative z-10 border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16 animate-fade-in-up">
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">¿Por qué unirte a nuestro canal?</h3>
+                <p class="text-slate-600 text-lg max-w-2xl mx-auto">Diseñamos una experiencia libre de fricciones para
+                    que encuentres tu próximo trabajo ideal con la menor fricción posible.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div
+                    class="bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 animate-fade-in-up delay-100">
+                    <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-blue-600">
+                        <span class="material-symbols-outlined text-3xl">bolt</span>
+                    </div>
+                    <h4 class="text-2xl font-bold text-slate-900 mb-3">Notificaciones Rápidas</h4>
+                    <p class="text-slate-600">Enterate antes que nadie. Recibí alertas instantáneas de nuevas vacantes,
+                        sin tener que entrar a buscar todos los días.</p>
                 </div>
-                <div class="flex-1 w-full relative">
-                    <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">location_on</span>
-                    <input
-                        class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                        placeholder="Ciudad o Región" type="text" />
+                <!-- Card 2 -->
+                <div
+                    class="bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 animate-fade-in-up delay-200">
+                    <div
+                        class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6 text-green-600">
+                        <span class="material-symbols-outlined text-3xl">money_off</span>
+                    </div>
+                    <h4 class="text-2xl font-bold text-slate-900 mb-3">100% Gratuito</h4>
+                    <p class="text-slate-600">No cobramos comisiones ni tenemos planes premium para buscar trabajo.
+                        Todas las ofertas son accesibles para todos de forma transparente.</p>
                 </div>
-                <div class="w-full md:w-auto">
-                    <button
-                        class="w-full md:w-auto bg-primary text-background-dark font-bold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
-                        <span>Buscar</span>
-                    </button>
+                <!-- Card 3 -->
+                <div
+                    class="bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-3 animate-fade-in-up delay-300">
+                    <div
+                        class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 text-purple-600">
+                        <span class="material-symbols-outlined text-3xl">verified_user</span>
+                    </div>
+                    <h4 class="text-2xl font-bold text-slate-900 mb-3">Ofertas Verificadas</h4>
+                    <p class="text-slate-600">Filtramos y verificamos cada oportunidad antes de enviarla, garantizando
+                        que sean empleos reales y de calidad de empresas confiables.</p>
                 </div>
             </div>
-            <h3 class="text-3xl font-bold text-slate-900 mb-8 text-center md:text-left">Empleos Destacados</h3>
-            <!-- Job Grid -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Job Card 1 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">business_center</span>
+        </div>
+    </section>
+
+    <!-- Cómo Funciona -->
+    <section class="py-24 bg-background-light relative border-t border-slate-200 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row items-center gap-16">
+                <!-- Text -->
+                <div class="md:w-1/2 animate-fade-in-up">
+                    <h3 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">Un proceso simple
+                        <br>de 3 pasos</h3>
+
+                    <div class="space-y-10 mt-12">
+                        <div class="flex gap-6 group">
+                            <div
+                                class="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
+                                1</div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-slate-900 mb-2">Hacé clic en "Unirme"</h4>
+                                <p class="text-slate-600 text-lg">Hacé clic en los botones para unirte al canal y se
+                                    abrirá WhatsApp en tu teléfono celular o tu computadora automáticamente.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Asistente Administrativo</h4>
-                            <p class="text-slate-500 text-sm">TechCorp Inc. • Remoto</p>
+                        <div class="flex gap-6 group">
+                            <div
+                                class="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
+                                2</div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-slate-900 mb-2">Confirmá tu suscripción</h4>
+                                <p class="text-slate-600 text-lg">Ingresá al canal de WhatsApp. Es completamente
+                                    privado, tu información y foto estarán seguras entre tú y los administradores.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6 group">
+                            <div
+                                class="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
+                                3</div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-slate-900 mb-2">Postulate activamente</h4>
+                                <p class="text-slate-600 text-lg">Navegá los avisos entrantes en tiempo real. Cuando un
+                                    puesto resuene contigo y con tu experiencia, ¡postuláte sin vueltas!</p>
+                            </div>
                         </div>
                     </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
                 </div>
-                <!-- Job Card 2 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">code</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Secretario/a Administrativo</h4>
-                            <p class="text-slate-500 text-sm">Estudio Jurídico López • Híbrido</p>
-                        </div>
-                    </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
-                </div>
-                <!-- Job Card 3 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">campaign</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Personal de Maestranza</h4>
-                            <p class="text-slate-500 text-sm">Edificio Central • CABA</p>
-                        </div>
-                    </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
-                </div>
-                <!-- Job Card 4 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">account_balance</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Recepcionista</h4>
-                            <p class="text-slate-500 text-sm">Clínica Salud • Córdoba</p>
-                        </div>
-                    </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
-                </div>
-                <!-- Job Card 5 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">local_shipping</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Asistente de Dirección</h4>
-                            <p class="text-slate-500 text-sm">Empresa Gastronómica • Rosario</p>
+                <!-- Image/Graphic -->
+                <div class="md:w-1/2 relative animate-fade-in-up delay-200">
+                    <div
+                        class="bg-white rounded-[2rem] shadow-2xl p-4 border border-slate-100 max-w-[340px] mx-auto floating transform -rotate-2">
+                        <!-- Mockup Smartphone UI -->
+                        <div
+                            class="bg-slate-50 rounded-[1.5rem] border-8 border-slate-800 h-[550px] w-full overflow-hidden flex flex-col relative shadow-inner">
+                            <!-- Notch -->
+                            <div class="absolute top-0 w-full flex justify-center z-10">
+                                <div class="w-32 h-7 bg-slate-800 rounded-b-3xl"></div>
+                            </div>
+                            <!-- Header -->
+                            <div
+                                class="bg-slate-200/50 pt-10 pb-4 px-4 border-b border-slate-200 flex items-center gap-3 backdrop-blur-md">
+                                <div
+                                    class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                    <span class="material-symbols-outlined mb-0">work</span></div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-[15px]">Todo Trabajo - Vacantes</h5>
+                                    <p class="text-xs text-slate-500">Info. del canal</p>
+                                </div>
+                            </div>
+                            <!-- Messages -->
+                            <div
+                                class="flex-1 p-4 space-y-4 overflow-hidden relative bg-[url('https://placeholder.pics/svg/100/e2e8f0-f8fafc')] bg-cover">
+                                <div
+                                    class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 w-[90%] left-0 relative animate-fade-in-up">
+                                    <p class="text-sm text-green-600 font-bold mb-1">📢 Nueva Vacante: Administrativo
+                                        CABA</p>
+                                    <p class="text-xs text-slate-600 mb-3 leading-relaxed">Empresa multinacional busca
+                                        administrativo para la zona del centro porteño...</p>
+                                    <div
+                                        class="bg-slate-50 rounded-lg p-2 text-xs text-primary font-bold text-center border border-slate-100 hover:bg-slate-100 cursor-pointer">
+                                        Ver oferta y postularme</div>
+                                </div>
+                                <div
+                                    class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 w-[90%] left-0 relative animate-fade-in-up delay-100">
+                                    <p class="text-sm text-green-600 font-bold mb-1">📢 Nueva Vacante: Recepcionista</p>
+                                    <p class="text-xs text-slate-600 mb-3 leading-relaxed">Clínica privada en Zona Norte
+                                        busca recepcionista full time...</p>
+                                    <div
+                                        class="bg-slate-50 rounded-lg p-2 text-xs text-primary font-bold text-center border border-slate-100 hover:bg-slate-100 cursor-pointer">
+                                        Ver oferta y postularme</div>
+                                </div>
+                                <!-- Gradient fade at bottom -->
+                                <div
+                                    class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-50 to-transparent">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
-                </div>
-                <!-- Job Card 6 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">support_agent</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Operador de Call Center</h4>
-                            <p class="text-slate-500 text-sm">Servicios BPO SA • Remoto</p>
-                        </div>
+                    <!-- Decorative elements -->
+                    <div
+                        class="absolute -bottom-10 -right-10 w-40 h-40 bg-[radial-gradient(#94a3b8_2px,transparent_2px)] [background-size:16px_16px] -z-10 rounded-full opacity-50">
                     </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
-                </div>
-                <!-- Job Card 7 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">engineering</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Recepcionista y Auxiliar</h4>
-                            <p class="text-slate-500 text-sm">Consorcio Torres • Mendoza</p>
-                        </div>
-                    </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
-                </div>
-                <!-- Job Card 8 -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg transition-shadow flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-slate-600">palette</span>
-                        </div>
-                        <div>
-                            <h4 class="text-slate-900 font-bold text-lg">Auxiliar Administrativo</h4>
-                            <p class="text-slate-500 text-sm">Distribuidora Sur • Remoto</p>
-                        </div>
-                    </div>
-                    <button
-                        class="border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-primary group-hover:text-background-dark group-hover:border-primary transition-all">
-                        POSTULARME
-                    </button>
                 </div>
             </div>
-            <div class="mt-12 text-center">
-                <a class="inline-flex items-center gap-2 text-primary font-bold hover:underline" href="#">
-                    Ver todas las ofertas
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                </a>
-            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-24 bg-slate-900 text-center relative overflow-hidden">
+        <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/20 blur-[120px] rounded-full pointer-events-none">
+        </div>
+        <div class="max-w-3xl mx-auto px-6 relative z-10 animate-fade-in-up">
+            <h3 class="text-4xl md:text-5xl font-black text-white mb-6">¿Qué estás esperando?</h3>
+            <p class="text-xl text-slate-300 mb-10 font-medium">Tu próximo gran proyecto laboral podría llegar en el
+                próximo mensaje que recibas hoy.</p>
+            <a href="https://whatsapp.com" target="_blank"
+                class="inline-flex items-center gap-3 bg-green-500 text-white text-xl font-bold py-5 px-12 rounded-2xl hover:bg-green-600 transition-all shadow-[0_0_40px_rgba(34,197,94,0.4)] transform hover:scale-105">
+                <span class="material-symbols-outlined text-3xl">forum</span>
+                UNIRME AHORA AL CANAL
+            </a>
         </div>
     </section><!-- Footer -->
     <footer class="bg-background-dark pt-12 pb-8 border-t border-slate-800">
@@ -313,7 +382,8 @@
                 <div>
                     <h3 class="text-white font-bold mb-4">Candidatos</h3>
                     <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a class="hover:text-primary transition-colors" href="#">Buscar Empleo</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="canal-difusion.html">Canal de
+                                Difusión</a></li>
                         <li><a class="hover:text-primary transition-colors" href="#">Crear CV</a></li>
                         <li><a class="hover:text-primary transition-colors" href="#">Alertas de Empleo</a></li>
                     </ul>
@@ -321,9 +391,10 @@
                 <div>
                     <h3 class="text-white font-bold mb-4">Empresas</h3>
                     <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a class="hover:text-primary transition-colors" href="#">Publicar Oferta</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="#">Buscar Talentos</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="#">Planes de Precios</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="buscar-talento.html">Busco
+                                Personal</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="servicios.html">Capacitación</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="servicios.html">Consultoría</a></li>
                     </ul>
                 </div>
                 <div>
@@ -396,7 +467,9 @@
 
                     <p class="mt-8 text-center text-sm text-slate-400">
                         ¿No tienes una cuenta?
-                        <a href="#" onclick="document.getElementById('login-modal').classList.add('hidden'); document.getElementById('register-modal').classList.remove('hidden')" class="text-primary hover:underline font-medium">Regístrate</a>
+                        <a href="#"
+                            onclick="document.getElementById('login-modal').classList.add('hidden'); document.getElementById('register-modal').classList.remove('hidden')"
+                            class="text-primary hover:underline font-medium">Regístrate</a>
                     </p>
                 </div>
             </div>
@@ -446,11 +519,11 @@
                             <label class="block text-sm font-medium text-slate-300 mb-1">Tipo de Cuenta</label>
                             <select
                                 class="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
-                                <option value="candidato">Soy Candidato (Busco Empleo)</option>
-                                <option value="empresa">Soy Empresa (Busco Empleados)</option>
+                                <option value="candidato">Soy Candidato (Quiero sumarme al canal)</option>
+                                <option value="empresa">Soy Empresa (Busco Personal)</option>
                             </select>
                         </div>
-                        
+
                         <button type="button"
                             class="w-full bg-secondary text-white font-bold py-3 px-4 rounded-lg hover:bg-secondary/90 transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] mt-6">
                             Registrarme
@@ -459,7 +532,9 @@
 
                     <p class="mt-6 text-center text-sm text-slate-400">
                         ¿Ya tienes una cuenta?
-                        <a href="#" onclick="document.getElementById('register-modal').classList.add('hidden'); document.getElementById('login-modal').classList.remove('hidden')" class="text-primary hover:underline font-medium">Inicia Sesión</a>
+                        <a href="#"
+                            onclick="document.getElementById('register-modal').classList.add('hidden'); document.getElementById('login-modal').classList.remove('hidden')"
+                            class="text-primary hover:underline font-medium">Inicia Sesión</a>
                     </p>
                 </div>
             </div>
