@@ -1,0 +1,208 @@
+"use client";
+
+import { useState } from "react";
+
+const JOBS = [
+  {
+    id: 1,
+    title: "Administrativo Contable Ssr.",
+    company: "Empresa Logística",
+    location: "CABA, Argentina",
+    type: "Full-time",
+    salary: "$750k - $900k",
+    icon: "corporate_fare",
+  },
+  {
+    id: 2,
+    title: "Personal de Maestranza",
+    company: "Sanatorio Privado",
+    location: "Córdoba",
+    type: "Part-time",
+    salary: "A convenir",
+    icon: "cleaning_services",
+  },
+  {
+    id: 3,
+    title: "Secretaria Ejecutiva Jr.",
+    company: "Estudio Jurídico",
+    location: "Rosario",
+    type: "Full-time",
+    salary: "$500k",
+    icon: "support_agent",
+  },
+];
+
+export default function BuscarEmpleo() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationTerm, setLocationTerm] = useState("");
+
+  const filteredJobs = JOBS.filter((job) => {
+    const s = searchTerm.toLowerCase();
+    const l = locationTerm.toLowerCase();
+    const matchesSearch =
+      job.title.toLowerCase().includes(s) || job.company.toLowerCase().includes(s);
+    const matchesLocation = job.location.toLowerCase().includes(l);
+    return matchesSearch && matchesLocation;
+  });
+
+  return (
+    <>
+      {/* Hero / Search Section */}
+      <section className="pt-40 pb-20 bg-gradient-to-b from-background-dark to-[#0f1618]">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">
+            Encontrá tu próximo <span className="text-primary">desafío</span>
+          </h2>
+          <p className="text-slate-400 text-lg mb-12 max-w-2xl mx-auto">
+            Especialistas en mandos medios, personal de maestranza y
+            administrativos en toda la Argentina.
+          </p>
+
+          {/* Search Bar */}
+          <div className="max-w-4xl mx-auto bg-surface-dark p-4 rounded-2xl border border-slate-800 shadow-2xl flex flex-col md:flex-row gap-4">
+            <div className="flex-1 flex items-center gap-3 px-4 bg-background-dark rounded-xl border border-slate-700">
+              <span className="material-symbols-outlined text-slate-500">search</span>
+              <input
+                type="text"
+                placeholder="Puesto, empresa o palabra clave"
+                className="bg-transparent border-none text-white w-full py-3 focus:ring-0 placeholder:text-slate-600 outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="md:w-64 flex items-center gap-3 px-4 bg-background-dark rounded-xl border border-slate-700">
+              <span className="material-symbols-outlined text-slate-500">
+                location_on
+              </span>
+              <input
+                type="text"
+                placeholder="Ubicación"
+                className="bg-transparent border-none text-white w-full py-3 focus:ring-0 placeholder:text-slate-600 outline-none"
+                value={locationTerm}
+                onChange={(e) => setLocationTerm(e.target.value)}
+              />
+            </div>
+            <button className="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-xl transition-all">
+              BUSCAR
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Job Listings */}
+      <section className="py-20 bg-[#0f1618]">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row gap-12">
+          {/* Sidebar Filters */}
+          <aside className="w-full lg:w-64 space-y-8">
+            <div>
+              <h3 className="text-white font-bold mb-4">Tipo de Trabajo</h3>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                  />
+                  Full-time
+                </label>
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                  />
+                  Part-time
+                </label>
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                  />
+                  Remoto
+                </label>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-bold mb-4">Categoría</h3>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                  />
+                  Administrativo
+                </label>
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                  />
+                  Maestranza
+                </label>
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                  />
+                  Secretariado
+                </label>
+              </div>
+            </div>
+          </aside>
+
+          {/* Jobs Grid */}
+          <div className="flex-1 space-y-6">
+            {filteredJobs.map((job) => (
+              <div
+                key={job.id}
+                className="job-card bg-surface-dark p-6 rounded-2xl border border-slate-800 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[0_10px_30px_-10px_rgba(19,200,236,0.2)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+              >
+                <div className="flex gap-6">
+                  <div className="w-16 h-16 bg-background-dark rounded-xl flex items-center justify-center flex-shrink-0 text-primary border border-slate-700">
+                    <span className="material-symbols-outlined text-3xl">
+                      {job.icon}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {job.title}
+                    </h3>
+                    <p className="text-primary font-bold text-sm mb-2">
+                      {job.company}
+                    </p>
+                    <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm">
+                          location_on
+                        </span>
+                        {job.location}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm">
+                          schedule
+                        </span>
+                        {job.type}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm">
+                          payments
+                        </span>
+                        {job.salary}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <button className="bg-slate-800 hover:bg-primary hover:text-background-dark text-white font-bold py-2.5 px-6 rounded-lg transition-all text-sm w-full md:w-auto">
+                  Ver Detalles
+                </button>
+              </div>
+            ))}
+            {filteredJobs.length === 0 && (
+              <div className="text-center py-12 text-slate-500">
+                No se encontraron empleos que coincidan con tu búsqueda.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

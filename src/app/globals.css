@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #13c8ec;
+  --color-secondary: #ff6b00;
+  --color-background-light: #f6f8f8;
+  --color-background-dark: #111718;
+  --color-surface-dark: #1c2527;
+  
+  --font-display: "Manrope", sans-serif;
+  
+  --background-image-hero-pattern: url('https://placeholder.pics/svg/300');
+  --background-image-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+}
+
+@layer utilities {
+  .glass-nav {
+    background: rgba(17, 23, 24, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px rgba(19, 200, 236, 0.5);
+  }
+
+  .glow-border {
+    box-shadow: 0 0 15px rgba(19, 200, 236, 0.15);
+  }
+
+  .curve-separator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+  }
+
+  .curve-separator svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 120px;
+  }
+
+  .curve-separator .shape-fill {
+    fill: #f6f8f8;
+  }
+
+  .animate-fade-in-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .floating {
+    animation: floating 4s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
