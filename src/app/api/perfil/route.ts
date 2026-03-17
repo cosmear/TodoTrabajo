@@ -31,8 +31,9 @@ export async function GET(request: Request) {
 
       const user = userRows[0];
       let applications = [];
+      let companyJobs: any[] = [];
 
-      // If it's a candidate, fetch jobs they applied to
+      // If it's a candidato, fetch jobs they applied to
       if (user.tipo_cuenta === 'candidato') {
         const [appRows]: any = await connection.query(
           `SELECT a.id, a.status, a.created_at, j.posicion, j.empresa, j.provincia, j.pais
@@ -45,7 +46,42 @@ export async function GET(request: Request) {
         applications = appRows;
       }
 
-      return NextResponse.json({ success: true, user, applications });
+      // If it's an empresa, fetch their created job postings and applicants
+      if (user.tipo_cuenta === 'empresa') {
+        // Fetch jobs created by this user
+        const [jobsRows]: any = await connection.query(
+          `SELECT * FROM job_postings WHERE user_id = ? ORDER BY created_at DESC`,
+          [userId]
+        );
+        
+        // Ensure there's an applications array for each job
+        companyJobs = jobsRows.map((job: any) => ({ ...job, applications: [] }));
+
+        if (companyJobs.length > 0) {
+          const jobIds = companyJobs.map((j: any) => j.id);
+          
+          // Fetch candidates for these jobs joining with users table to get name and email
+          const [applicantsRows]: any = await connection.query(
+            `SELECT a.id as application_id, a.job_id, a.status, a.created_at, 
+                    u.nombre_completo, u.email
+             FROM applications a
+             JOIN users u ON a.user_id = u.id
+             WHERE a.job_id IN (?)
+             ORDER BY a.created_at DESC`,
+            [jobIds]
+          );
+
+          // Group applicants by job_id
+          applicantsRows.forEach((applicant: any) => {
+             const job = companyJobs.find((j: any) => j.id === applicant.job_id);
+             if (job) {
+                job.applications.push(applicant);
+             }
+          });
+        }
+      }
+
+      return NextResponse.json({ success: true, user, applications, companyJobs });
     } finally {
       connection.release();
     }

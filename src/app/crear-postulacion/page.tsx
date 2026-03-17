@@ -39,9 +39,13 @@ export default function CrearPostulacion() {
     setErrorMsg("");
 
     try {
+      const token = localStorage.getItem("tt_session");
       const response = await fetch("/api/postulaciones", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(formData),
       });
 

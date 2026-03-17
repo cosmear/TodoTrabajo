@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import jwt from 'jsonwebtoken';
 
 export async function GET() {
   try {
@@ -19,6 +20,19 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecret123') as any;
+    } catch(err) {
+      return NextResponse.json({ success: false, error: 'Token inválido o expirado' }, { status: 401 });
+    }
+    const userId = decoded.id;
+
     const data = await request.json();
     const {
       empresa, posicion, requisitos, areas,
@@ -32,13 +46,13 @@ export async function POST(request: Request) {
     try {
       const [result]: any = await connection.query(
         `INSERT INTO job_postings (
-          empresa, posicion, requisitos, areas,
+          user_id, empresa, posicion, requisitos, areas,
           disponibilidad, contacto, pais, provincia,
            areas_interes, zona, direccion,
            visible_suscripcion, requiere_salario
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          empresa, posicion, requisitos || '', areas,
+          userId, empresa, posicion, requisitos || '', areas,
           disponibilidad, contacto, pais, provincia,
           areas_interes, zona, direccion,
           visible_suscripcion || false, requiere_salario || false

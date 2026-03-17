@@ -55,11 +55,13 @@ export default function AuthModals() {
         document.getElementById("register-modal")?.classList.add("hidden");
         
         // Redirigimos dependiendo del tipo de cuenta elegido
-        if (registerType === "candidato") {
-          router.push("/registro-candidato");
-        } else {
-          router.push("/registro-empresa"); 
-        }
+        // if (registerType === "candidato") {
+        //   router.push("/registro-candidato");
+        // } else {
+        //   router.push("/registro-empresa"); 
+        // }
+        // NEW REQUIREMENT: Redirect all to /mi-perfil
+        router.push("/mi-perfil");
       } else {
         setRegError(data.error);
       }

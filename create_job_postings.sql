@@ -3,6 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS job_postings (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     empresa VARCHAR(255) NOT NULL,
     posicion VARCHAR(255) NOT NULL,
     requisitos TEXT,
