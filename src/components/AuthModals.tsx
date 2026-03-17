@@ -6,17 +6,95 @@ import { useRouter } from "next/navigation";
 
 export default function AuthModals() {
   const router = useRouter();
+  
+  // Registration State
   const [registerType, setRegisterType] = useState("candidato");
+  const [regData, setRegData] = useState({
+    nombreCompleto: "",
+    email: "",
+    password: "",
+  });
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState("");
 
-  const handleRegisterNavigation = () => {
-    // Escondemos el modal actual
-    document.getElementById("register-modal")?.classList.add("hidden");
-    
-    // Redirigimos dependiendo del tipo de cuenta elegido
-    if (registerType === "candidato") {
-      router.push("/registro-candidato");
-    } else {
-      router.push("/registro-empresa"); 
+  // Login State
+  const [logData, setLogData] = useState({
+    email: "",
+    password: "",
+  });
+  const [logLoading, setLogLoading] = useState(false);
+  const [logError, setLogError] = useState("");
+
+  // Handler for dynamic input changes
+  const handleRegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRegData({ ...regData, [e.target.name]: e.target.value });
+  };
+  
+  const handleLogChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLogData({ ...logData, [e.target.name]: e.target.value });
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegLoading(true);
+    setRegError("");
+
+    try {
+      const resp = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...regData, tipoCuenta: registerType })
+      });
+      const data = await resp.json();
+
+      if (data.success) {
+        // Guarda Token de sesion (en un caso real de prod iría a localStorage o cookies)
+        localStorage.setItem("tt_session", data.token);
+
+        // Escondemos el modal actual
+        document.getElementById("register-modal")?.classList.add("hidden");
+        
+        // Redirigimos dependiendo del tipo de cuenta elegido
+        if (registerType === "candidato") {
+          router.push("/registro-candidato");
+        } else {
+          router.push("/registro-empresa"); 
+        }
+      } else {
+        setRegError(data.error);
+      }
+    } catch (err) {
+      setRegError("Error de conexión");
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLogLoading(true);
+    setLogError("");
+
+    try {
+      const resp = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(logData)
+      });
+      const data = await resp.json();
+
+      if (data.success) {
+        localStorage.setItem("tt_session", data.token);
+        document.getElementById("login-modal")?.classList.add("hidden");
+        // Refrescamos la pagina o ruteamos a mi-perfil
+        window.location.reload(); 
+      } else {
+        setLogError(data.error);
+      }
+    } catch (err) {
+      setLogError("Error de conexión");
+    } finally {
+      setLogLoading(false);
     }
   };
 
@@ -53,12 +131,22 @@ export default function AuthModals() {
                 Ingresa a tu cuenta para continuar
               </p>
 
-              <form className="space-y-5">
+              {logError && (
+                <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-500 text-sm text-center">
+                  {logError}
+                </div>
+              )}
+
+              <form onSubmit={handleLoginSubmit} className="space-y-5">
                 <div className="text-left">
                   <label className="block text-sm font-medium text-slate-300 mb-1">
                     Correo Electrónico
                   </label>
                   <input
+                    required
+                    name="email"
+                    value={logData.email}
+                    onChange={handleLogChange}
                     type="email"
                     className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="tu@email.com"
@@ -69,6 +157,10 @@ export default function AuthModals() {
                     Contraseña
                   </label>
                   <input
+                    required
+                    name="password"
+                    value={logData.password}
+                    onChange={handleLogChange}
                     type="password"
                     className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="••••••••"
@@ -93,10 +185,11 @@ export default function AuthModals() {
                   </Link>
                 </div>
                 <button
-                  type="button"
-                  className="w-full bg-primary text-background-dark font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(19,200,236,0.3)] mt-6"
+                  type="submit"
+                  disabled={logLoading}
+                  className={`w-full text-background-dark font-bold py-3 px-4 rounded-lg transition-all shadow-[0_0_15px_rgba(19,200,236,0.3)] mt-6 ${logLoading ? "bg-primary/50 cursor-not-allowed" : "bg-primary hover:bg-primary/90"}`}
                 >
-                  Iniciar Sesión
+                  {logLoading ? "Cargando..." : "Iniciar Sesión"}
                 </button>
               </form>
 
@@ -147,13 +240,23 @@ export default function AuthModals() {
               <p className="text-slate-400 text-sm text-center mb-8">
                 Únete a Todo Trabajo hoy mismo
               </p>
+              
+              {regError && (
+                <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-500 text-sm text-center">
+                  {regError}
+                </div>
+              )}
 
-              <form className="space-y-4">
+              <form onSubmit={handleRegisterSubmit} className="space-y-4">
                 <div className="text-left">
                   <label className="block text-sm font-medium text-slate-300 mb-1">
                     Nombre Completo
                   </label>
                   <input
+                    required
+                    name="nombreCompleto"
+                    value={regData.nombreCompleto}
+                    onChange={handleRegChange}
                     type="text"
                     className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="Juan Pérez"
@@ -164,6 +267,10 @@ export default function AuthModals() {
                     Correo Electrónico
                   </label>
                   <input
+                    required
+                    name="email"
+                    value={regData.email}
+                    onChange={handleRegChange}
                     type="email"
                     className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="tu@email.com"
@@ -174,6 +281,10 @@ export default function AuthModals() {
                     Contraseña
                   </label>
                   <input
+                    required
+                    name="password"
+                    value={regData.password}
+                    onChange={handleRegChange}
                     type="password"
                     className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
                     placeholder="••••••••"
@@ -196,11 +307,11 @@ export default function AuthModals() {
                 </div>
 
                 <button
-                  type="button"
-                  onClick={handleRegisterNavigation}
-                  className="w-full bg-secondary text-white font-bold py-3 px-4 rounded-lg hover:bg-secondary/90 transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] mt-6"
+                  type="submit"
+                  disabled={regLoading}
+                  className={`w-full text-white font-bold py-3 px-4 rounded-lg transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] mt-6 ${regLoading ? "bg-secondary/50 cursor-not-allowed" : "bg-secondary hover:bg-secondary/90"}`}
                 >
-                  Registrarme
+                  {regLoading ? "Cargando..." : "Registrarme"}
                 </button>
               </form>
 

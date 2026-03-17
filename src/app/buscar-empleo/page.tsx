@@ -1,47 +1,37 @@
 "use client";
-
-import { useState } from "react";
-
-const JOBS = [
-  {
-    id: 1,
-    title: "Administrativo Contable Ssr.",
-    company: "Empresa Logística",
-    location: "CABA, Argentina",
-    type: "Full-time",
-    salary: "$750k - $900k",
-    icon: "corporate_fare",
-  },
-  {
-    id: 2,
-    title: "Personal de Maestranza",
-    company: "Sanatorio Privado",
-    location: "Córdoba",
-    type: "Part-time",
-    salary: "A convenir",
-    icon: "cleaning_services",
-  },
-  {
-    id: 3,
-    title: "Secretaria Ejecutiva Jr.",
-    company: "Estudio Jurídico",
-    location: "Rosario",
-    type: "Full-time",
-    salary: "$500k",
-    icon: "support_agent",
-  },
-];
+import { useState, useEffect } from "react";
 
 export default function BuscarEmpleo() {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationTerm, setLocationTerm] = useState("");
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredJobs = JOBS.filter((job) => {
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await fetch("/api/postulaciones");
+        const data = await res.json();
+        if (data.success) {
+          setJobs(data.postulaciones);
+        }
+      } catch (error) {
+        console.error("Error cargando postulaciones:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  const filteredJobs = jobs.filter((job) => {
     const s = searchTerm.toLowerCase();
     const l = locationTerm.toLowerCase();
-    const matchesSearch =
-      job.title.toLowerCase().includes(s) || job.company.toLowerCase().includes(s);
-    const matchesLocation = job.location.toLowerCase().includes(l);
+    const searchString = `${job.posicion} ${job.empresa}`.toLowerCase();
+    const locationString = `${job.provincia} ${job.pais}`.toLowerCase();
+
+    const matchesSearch = searchString.includes(s);
+    const matchesLocation = locationString.includes(l);
     return matchesSearch && matchesLocation;
   });
 
@@ -150,51 +140,58 @@ export default function BuscarEmpleo() {
 
           {/* Jobs Grid */}
           <div className="flex-1 space-y-6">
-            {filteredJobs.map((job) => (
-              <div
-                key={job.id}
-                className="job-card bg-surface-dark p-6 rounded-2xl border border-slate-800 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[0_10px_30px_-10px_rgba(19,200,236,0.2)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
-              >
-                <div className="flex gap-6">
-                  <div className="w-16 h-16 bg-background-dark rounded-xl flex items-center justify-center flex-shrink-0 text-primary border border-slate-700">
-                    <span className="material-symbols-outlined text-3xl">
-                      {job.icon}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      {job.title}
-                    </h3>
-                    <p className="text-primary font-bold text-sm mb-2">
-                      {job.company}
-                    </p>
-                    <div className="flex flex-wrap gap-4 text-xs text-slate-500">
-                      <span className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-sm">
-                          location_on
-                        </span>
-                        {job.location}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-sm">
-                          schedule
-                        </span>
-                        {job.type}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-sm">
-                          payments
-                        </span>
-                        {job.salary}
+            {loading ? (
+              <div className="text-center py-12 text-slate-500">
+                <span className="material-symbols-outlined animate-spin text-4xl mb-4 text-primary">sync</span>
+                <p>Cargando posiciones laborales...</p>
+              </div>
+            ) : (
+              filteredJobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="job-card bg-surface-dark p-6 rounded-2xl border border-slate-800 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[0_10px_30px_-10px_rgba(19,200,236,0.2)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+                >
+                  <div className="flex gap-6">
+                    <div className="w-16 h-16 bg-background-dark rounded-xl flex items-center justify-center flex-shrink-0 text-primary border border-slate-700">
+                      <span className="material-symbols-outlined text-3xl">
+                        work
                       </span>
                     </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-1">
+                        {job.posicion}
+                      </h3>
+                      <p className="text-primary font-bold text-sm mb-2">
+                        {job.empresa}
+                      </p>
+                      <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-sm">
+                            location_on
+                          </span>
+                          {job.provincia}, {job.pais}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-sm">
+                            schedule
+                          </span>
+                          {job.disponibilidad}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-sm">
+                            payments
+                          </span>
+                          A convenir
+                        </span>
+                      </div>
+                    </div>
                   </div>
+                  <button className="bg-slate-800 hover:bg-primary hover:text-background-dark text-white font-bold py-2.5 px-6 rounded-lg transition-all text-sm w-full md:w-auto">
+                    Aplicar
+                  </button>
                 </div>
-                <button className="bg-slate-800 hover:bg-primary hover:text-background-dark text-white font-bold py-2.5 px-6 rounded-lg transition-all text-sm w-full md:w-auto">
-                  Ver Detalles
-                </button>
-              </div>
-            ))}
+              ))
+            )}
             {filteredJobs.length === 0 && (
               <div className="text-center py-12 text-slate-500">
                 No se encontraron empleos que coincidan con tu búsqueda.

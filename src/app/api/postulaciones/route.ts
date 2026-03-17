@@ -1,6 +1,22 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+export async function GET() {
+  try {
+    const connection = await pool.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `SELECT * FROM job_postings ORDER BY created_at DESC`
+      );
+      return NextResponse.json({ success: true, postulaciones: rows });
+    } finally {
+      connection.release();
+    }
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
