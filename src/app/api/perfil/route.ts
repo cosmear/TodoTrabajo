@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     try {
       // Get User basic info
       const [userRows]: any = await connection.query(
-        `SELECT id, nombre_completo, email, tipo_cuenta FROM users WHERE id = ?`,
+        `SELECT id, nombre_completo, email, tipo_cuenta, telefono, cv_url FROM users WHERE id = ?`,
         [userId]
       );
 
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
           // Fetch candidates for these jobs joining with users table to get name and email
           const [applicantsRows]: any = await connection.query(
             `SELECT a.id as application_id, a.job_id, a.status, a.created_at, 
-                    u.nombre_completo, u.email
+                    u.nombre_completo, u.email, u.telefono, u.cv_url
              FROM applications a
              JOIN users u ON a.user_id = u.id
              WHERE a.job_id IN (?)

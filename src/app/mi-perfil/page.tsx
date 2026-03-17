@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -11,49 +11,111 @@ export default function MiPerfil() {
   const [errorMsg, setErrorMsg] = useState("");
   const [activeTab, setActiveTab] = useState("inicio");
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("tt_session");
-        
-        if (!token) {
-          router.push("/");
-          return;
-        }
+  // Edit Profile State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({ nombre_completo: "", telefono: "" });
+  const [editSaving, setEditSaving] = useState(false);
 
-        const res = await fetch("/api/perfil", {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
-        });
+  // CV Upload State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingCv, setUploadingCv] = useState(false);
 
-        const data = await res.json();
-
-        if (data.success) {
-          setProfile(data);
-          // Set active tab based on account type
-          setActiveTab(data.user?.tipo_cuenta === 'empresa' ? 'empresa' : 'inicio');
-        } else {
-          setErrorMsg(data.error || "Error cargando el perfil.");
-          if (data.status === 401) {
-             localStorage.removeItem("tt_session");
-             router.push("/");
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        setErrorMsg("Problema de red al cargar el perfil.");
-      } finally {
-        setLoading(false);
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("tt_session");
+      if (!token) {
+        router.push("/");
+        return;
       }
-    };
+      const res = await fetch("/api/perfil", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProfile(data);
+        if (!activeTab || activeTab === "inicio") {
+           setActiveTab(data.user?.tipo_cuenta === 'empresa' ? 'empresa' : 'inicio');
+        }
+      } else {
+        setErrorMsg(data.error || "Error cargando el perfil.");
+        if (data.status === 401) {
+           localStorage.removeItem("tt_session");
+           router.push("/");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Problema de red al cargar el perfil.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProfile();
   }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("tt_session");
     window.location.href = "/";
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const submitEditProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditSaving(true);
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/perfil/edit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(editData)
+      });
+      if (res.ok) {
+        setShowEditModal(false);
+        fetchProfile();
+      } else {
+        alert("Error al guardar perfil");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCv(true);
+    const formData = new FormData();
+    formData.append("cv", file);
+
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/upload-cv", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("CV Subido exitosamente");
+        fetchProfile();
+      } else {
+        alert(data.error || "Error al subir CV");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error de conexión al subir CV");
+    } finally {
+      setUploadingCv(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   if (loading) {
@@ -89,8 +151,8 @@ export default function MiPerfil() {
         {/* Sidebar */}
         <div className="w-full md:w-64 flex-shrink-0">
            <div className="bg-surface-dark border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
-              <div className="flex items-center gap-4 mb-8">
-                 <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-background-dark text-xl font-bold flex-shrink-0 shadow-[0_0_15px_rgba(19,200,236,0.3)]">
+              <div className="flex items-center gap-4 mb-4">
+                 <div className="w-12 h-12 bg-primary flex-shrink-0 rounded-full flex items-center justify-center text-background-dark text-xl font-bold shadow-[0_0_15px_rgba(19,200,236,0.3)]">
                     {profile.user?.nombre_completo?.charAt(0).toUpperCase()}
                  </div>
                  <div className="overflow-hidden">
@@ -98,32 +160,42 @@ export default function MiPerfil() {
                     <p className="text-slate-400 text-xs truncate capitalize">{profile.user?.tipo_cuenta}</p>
                  </div>
               </div>
+              
+              <button 
+                onClick={() => {
+                  setEditData({ nombre_completo: profile.user.nombre_completo, telefono: profile.user.telefono || "" });
+                  setShowEditModal(true);
+                }} 
+                className="w-full mb-6 border border-slate-700 text-slate-300 hover:bg-slate-800 py-1.5 rounded-lg text-xs font-bold transition-all"
+              >
+                Editar Perfil
+              </button>
 
               <div className="space-y-2">
                  {profile.user?.tipo_cuenta === "candidato" ? (
                     <>
-                       <button onClick={() => setActiveTab('inicio')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold ${activeTab === 'inicio' ? 'bg-primary/10 text-primary' : 'text-slate-300 hover:bg-slate-800'}`}>
-                          Inicio
+                       <button onClick={() => setActiveTab('inicio')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'inicio' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                          <span className="material-symbols-outlined text-[20px]">person</span> Inicio
                        </button>
-                       <button onClick={() => setActiveTab('asistencia')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold ${activeTab === 'asistencia' ? 'bg-primary/10 text-primary' : 'text-slate-300 hover:bg-slate-800'}`}>
-                          Asistencia
+                       <button onClick={() => setActiveTab('asistencia')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'asistencia' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                          <span className="material-symbols-outlined text-[20px]">support_agent</span> Asistencia
                        </button>
                     </>
                  ) : (
                     <>
-                       <button onClick={() => setActiveTab('empresa')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold ${activeTab === 'empresa' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-300 hover:bg-slate-800'}`}>
-                          Empresa
+                       <button onClick={() => setActiveTab('empresa')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'empresa' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                          <span className="material-symbols-outlined text-[20px]">business_center</span> Empresa
                        </button>
-                       <button onClick={() => setActiveTab('buscar_candidatos')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold ${activeTab === 'buscar_candidatos' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-300 hover:bg-slate-800'}`}>
-                          Buscar Candidatos
+                       <button onClick={() => setActiveTab('buscar_candidatos')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'buscar_candidatos' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                          <span className="material-symbols-outlined text-[20px]">search</span> Buscar Candidatos
                        </button>
                     </>
                  )}
-                 <button className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-slate-300 hover:bg-slate-800">
-                    Cambiar Contraseña
+                 <button className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-slate-400 hover:bg-slate-800 hover:text-white flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px]">lock</span> Cambiar Contraseña
                  </button>
-                 <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-red-400 hover:bg-red-500/10">
-                    Salir
+                 <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-red-500/80 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[20px]">logout</span> Salir
                  </button>
               </div>
            </div>
@@ -134,8 +206,22 @@ export default function MiPerfil() {
           {/* TAB: CANDIDATO - INICIO */}
           {activeTab === 'inicio' && profile.user?.tipo_cuenta === 'candidato' && (
              <div>
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                    <h1 className="text-3xl font-extrabold text-white">Mis Postulaciones</h1>
+                   
+                   {/* Botón subir CV */}
+                   <div className="flex items-center gap-3">
+                      {profile.user?.cv_url && (
+                        <a href={profile.user.cv_url} target="_blank" className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+                           <span className="material-symbols-outlined text-[16px]">visibility</span> Ver Mi CV
+                        </a>
+                      )}
+                      <input type="file" ref={fileInputRef} onChange={handleCvUpload} className="hidden" accept=".pdf,.doc,.docx" />
+                      <button onClick={() => fileInputRef.current?.click()} disabled={uploadingCv} className="bg-surface-dark border border-slate-700 hover:border-primary/50 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-all flex items-center gap-2">
+                         <span className="material-symbols-outlined text-[18px]">upload_file</span>
+                         {uploadingCv ? 'Subiendo...' : 'Subir CV (PDF/Word)'}
+                      </button>
+                   </div>
                 </div>
 
                 {profile.applications?.length === 0 ? (
@@ -211,17 +297,38 @@ export default function MiPerfil() {
                             ) : (
                                <div className="divide-y divide-slate-800/50">
                                   {job.applications.map((app: any) => (
-                                     <div key={app.application_id} className="p-4 px-6 flex items-center justify-between hover:bg-slate-800/20 transition-colors">
+                                     <div key={app.application_id} className="p-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/20 transition-colors">
+                                        
                                         <div className="flex items-center gap-4">
-                                           <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-white font-bold">
+                                           <div className="w-10 h-10 bg-slate-700 flex-shrink-0 rounded-full flex items-center justify-center text-white font-bold">
                                               {app.nombre_completo.charAt(0).toUpperCase()}
                                            </div>
                                            <div>
                                               <p className="font-bold text-slate-200 text-sm">{app.nombre_completo}</p>
-                                              <p className="text-slate-500 text-xs">{app.email}</p>
+                                              <p className="text-slate-500 text-xs mb-1">{app.email}</p>
+                                              
+                                              {/* Actions for Company to contact Candidate */}
+                                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                                 <a href={`mailto:${app.email}`} className="bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 transition-colors">
+                                                    <span className="material-symbols-outlined text-[14px]">mail</span> Email
+                                                 </a>
+                                                 
+                                                 {app.telefono && (
+                                                    <a href={`https://wa.me/${app.telefono.replace(/\D/g,'')}?text=Hola ${app.nombre_completo}, te contactamos por tu postulacion a ${job.posicion} en TodoTrabajo.`} target="_blank" rel="noreferrer" className="bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 transition-colors">
+                                                       <span className="material-symbols-outlined text-[14px]">chat</span> WhatsApp
+                                                    </a>
+                                                 )}
+
+                                                 {app.cv_url && (
+                                                    <a href={app.cv_url} target="_blank" rel="noreferrer" className="bg-[#5b83e8]/10 hover:bg-[#5b83e8]/20 border border-[#5b83e8]/20 text-[#5b83e8] text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 transition-colors">
+                                                       <span className="material-symbols-outlined text-[14px]">description</span> CV
+                                                    </a>
+                                                 )}
+                                              </div>
                                            </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-1">
+
+                                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
                                            <span className="text-xs text-slate-500">{new Date(app.created_at).toLocaleDateString()}</span>
                                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300">
                                               {app.status}
@@ -257,6 +364,53 @@ export default function MiPerfil() {
 
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
+            <div className="relative bg-surface-dark rounded-2xl border border-slate-800 shadow-2xl p-8 max-w-sm w-full z-10">
+               <button onClick={() => setShowEditModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                  <span className="material-symbols-outlined">close</span>
+               </button>
+               <h3 className="text-xl font-bold text-white mb-6">Editar Perfil</h3>
+               
+               <form onSubmit={submitEditProfile} className="space-y-4">
+                  <div>
+                     <label className="block text-sm text-slate-400 mb-1">Nombre Completo / Empresa</label>
+                     <input 
+                        required 
+                        type="text" 
+                        name="nombre_completo" 
+                        value={editData.nombre_completo} 
+                        onChange={handleEditChange}
+                        className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                     />
+                  </div>
+                  <div>
+                     <label className="block text-sm text-slate-400 mb-1">Teléfono (Ej: +54911223344)</label>
+                     <input 
+                        type="text" 
+                        name="telefono" 
+                        value={editData.telefono} 
+                        onChange={handleEditChange}
+                        className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                     />
+                     <p className="text-[10px] text-slate-500 mt-1">Incluye código de país para que WhatsApp funcione correctamente.</p>
+                  </div>
+
+                  <button 
+                     type="submit" 
+                     disabled={editSaving}
+                     className="w-full bg-primary text-background-dark font-bold py-3 mt-4 rounded-lg hover:bg-primary/90 transition-all"
+                  >
+                     {editSaving ? "Guardando..." : "Guardar Cambios"}
+                  </button>
+               </form>
+            </div>
+         </div>
+      )}
+
     </div>
   );
 }
