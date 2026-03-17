@@ -7,6 +7,8 @@ export default function BuscarEmpleo() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [applying, setApplying] = useState<number | null>(null);
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -23,6 +25,38 @@ export default function BuscarEmpleo() {
     };
     fetchJobs();
   }, []);
+
+  const handleApply = async (jobId: number) => {
+    const token = localStorage.getItem("tt_session");
+    if (!token) {
+      alert("Debes iniciar sesión como candidato para aplicar a un trabajo");
+      document.getElementById("login-modal")?.classList.remove("hidden");
+      return;
+    }
+
+    setApplying(jobId);
+    try {
+      const res = await fetch("/api/postulaciones/aplicar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jobId }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert("¡Aplicación enviada con éxito! Puedes verla en Mi Perfil");
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert("Ocurrió un error en el servidor");
+    } finally {
+      setApplying(null);
+    }
+  };
 
   const filteredJobs = jobs.filter((job) => {
     const s = searchTerm.toLowerCase();
@@ -186,8 +220,14 @@ export default function BuscarEmpleo() {
                       </div>
                     </div>
                   </div>
-                  <button className="bg-slate-800 hover:bg-primary hover:text-background-dark text-white font-bold py-2.5 px-6 rounded-lg transition-all text-sm w-full md:w-auto">
-                    Aplicar
+                  <button 
+                    onClick={() => handleApply(job.id)}
+                    disabled={applying === job.id}
+                    className={`bg-slate-800 text-white font-bold py-2.5 px-6 rounded-lg transition-all text-sm w-full md:w-auto ${
+                      applying === job.id ? "opacity-50 cursor-not-allowed" : "hover:bg-primary hover:text-background-dark"
+                    }`}
+                  >
+                    {applying === job.id ? "Enviando..." : "Aplicar"}
                   </button>
                 </div>
               ))
