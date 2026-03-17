@@ -7,7 +7,5 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     tipo_cuenta VARCHAR(50) NOT NULL COMMENT 'candidato o empresa',
-    telefono VARCHAR(50),
-    cv_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

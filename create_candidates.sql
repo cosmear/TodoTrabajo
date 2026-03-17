@@ -3,6 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS candidates (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNIQUE,
     nombre_apellido VARCHAR(255) NOT NULL,
     descripcion TEXT NOT NULL,
     fecha_nacimiento DATE NOT NULL,
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS candidates (
     twitter VARCHAR(255) DEFAULT '',
     instagram VARCHAR(255) DEFAULT '',
     tiktok VARCHAR(255) DEFAULT '',
+    cv_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

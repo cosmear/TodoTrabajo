@@ -54,11 +54,11 @@ export async function POST(request: Request) {
 
     const cvUrl = `/uploads/cvs/${uniqueName}`;
 
-    // Update User DB
+    // Update Candidates DB
     const connection = await pool.getConnection();
     try {
       await connection.query(
-        `UPDATE users SET cv_url = ? WHERE id = ?`,
+        `UPDATE candidates SET cv_url = ? WHERE user_id = ?`,
         [cvUrl, userId]
       );
     } finally {

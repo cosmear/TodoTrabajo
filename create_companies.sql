@@ -3,6 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS companies (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNIQUE,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT NOT NULL,
     telefono VARCHAR(50) NOT NULL,
