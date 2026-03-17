@@ -21,12 +21,13 @@ export async function GET(request: Request) {
 
   const connection = await pool.getConnection();
   try {
-    const [users]: any = await connection.query(
-      `SELECT id, nombre_completo, email, tipo_cuenta, is_active, created_at 
-       FROM users 
-       ORDER BY created_at DESC`
+    const [jobs]: any = await connection.query(
+      `SELECT j.id, j.posicion, j.empresa, j.is_active, j.created_at, u.email as publisher_email
+       FROM job_postings j
+       JOIN users u ON j.user_id = u.id
+       ORDER BY j.created_at DESC`
     );
-    return NextResponse.json({ success: true, users });
+    return NextResponse.json({ success: true, jobs });
   } finally {
     connection.release();
   }
@@ -36,15 +37,15 @@ export async function PUT(request: Request) {
   if (!(await verifyAdmin(request))) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
   const data = await request.json();
-  const { userId, is_active } = data;
+  const { jobId, is_active } = data;
 
   const connection = await pool.getConnection();
   try {
     await connection.query(
-      `UPDATE users SET is_active = ? WHERE id = ?`,
-      [is_active ? 1 : 0, userId]
+      `UPDATE job_postings SET is_active = ? WHERE id = ?`,
+      [is_active ? 1 : 0, jobId]
     );
-    return NextResponse.json({ success: true, message: 'Status updated' });
+    return NextResponse.json({ success: true, message: 'Job visibility updated' });
   } finally {
     connection.release();
   }

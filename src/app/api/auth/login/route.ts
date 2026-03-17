@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     try {
       const [rows]: any = await connection.query(
-        `SELECT * FROM users WHERE email = ?`,
+        `SELECT id, password_hash, tipo_cuenta, is_active FROM users WHERE email = ?`,
         [email]
       );
 
@@ -25,6 +25,11 @@ export async function POST(request: Request) {
       }
 
       const user = rows[0];
+
+      if (user.is_active === 0 || user.is_active === false) {
+        return NextResponse.json({ success: false, error: 'Tu cuenta ha sido suspendida. Contacta a soporte.' }, { status: 403 });
+      }
+
       const isValid = await bcrypt.compare(password, user.password_hash);
 
       if (!isValid) {

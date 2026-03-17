@@ -36,7 +36,28 @@ export async function POST(request: Request) {
 
     // Prepare bytes
     const bytes = await file.arrayBuffer();
+    
+    // Validate File Size (Max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (bytes.byteLength > MAX_SIZE) {
+       return NextResponse.json({ success: false, error: 'El archivo excede el límite de 5MB.' }, { status: 400 });
+    }
+
     const buffer = Buffer.from(bytes);
+
+    // Basic Anti-Virus Scanner: Look for embedded JS, execution headers, etc.
+    const fileContentString = buffer.toString('utf-8').toLowerCase();
+    const maliciousPatterns = [
+        '<script', 'javascript:', 'vbscript:', 'onload=', 'onerror=', // JS injection
+        '<object', '<applet', '<embed',                               // Obsolete executable objects
+        'eval(', 'powershell', 'cmd.exe',                             // Executable wrappers
+    ];
+
+    for (const pattern of maliciousPatterns) {
+        if (fileContentString.includes(pattern)) {
+             return NextResponse.json({ success: false, error: 'Archivo rechazado por motivos de seguridad (Código malicioso detectado).' }, { status: 403 });
+        }
+    }
 
     // Save to public/uploads/cvs
     const uploadsDir = join(process.cwd(), 'public', 'uploads', 'cvs');

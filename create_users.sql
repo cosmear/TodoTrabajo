@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     nombre_completo VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    tipo_cuenta VARCHAR(50) NOT NULL COMMENT 'candidato o empresa',
+    tipo_cuenta VARCHAR(50) NOT NULL COMMENT 'candidato, empresa, o admin',
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
