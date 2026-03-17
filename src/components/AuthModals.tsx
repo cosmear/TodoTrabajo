@@ -1,8 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AuthModals() {
+  const router = useRouter();
+  const [registerType, setRegisterType] = useState("candidato");
+
+  const handleRegisterNavigation = () => {
+    // Escondemos el modal actual
+    document.getElementById("register-modal")?.classList.add("hidden");
+    
+    // Redirigimos dependiendo del tipo de cuenta elegido
+    if (registerType === "candidato") {
+      router.push("/registro-candidato");
+    } else {
+      // Por ahora para empresa no hay ruta o asumimos algun placeholder
+      // router.push("/registro-empresa"); 
+      alert("Registro de empresa próximamente");
+    }
+  };
+
   return (
     <>
       {/* Login Modal */}
@@ -166,7 +185,11 @@ export default function AuthModals() {
                   <label className="block text-sm font-medium text-slate-300 mb-1">
                     Tipo de Cuenta
                   </label>
-                  <select className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                  <select 
+                    value={registerType}
+                    onChange={(e) => setRegisterType(e.target.value)}
+                    className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                  >
                     <option value="candidato">
                       Soy Candidato (Quiero sumarme al canal)
                     </option>
@@ -176,6 +199,7 @@ export default function AuthModals() {
 
                 <button
                   type="button"
+                  onClick={handleRegisterNavigation}
                   className="w-full bg-secondary text-white font-bold py-3 px-4 rounded-lg hover:bg-secondary/90 transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] mt-6"
                 >
                   Registrarme
