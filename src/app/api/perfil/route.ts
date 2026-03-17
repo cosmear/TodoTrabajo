@@ -29,16 +29,15 @@ export async function GET(request: Request) {
         return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
       }
 
-      const user = userRows[0];
+      let user = userRows[0];
       let applications = [];
       let companyJobs: any[] = [];
 
       // If it's a candidato, fetch jobs they applied to
       if (user.tipo_cuenta === 'candidato') {
-        const [candRows]: any = await connection.query(`SELECT telefono, cv_url FROM candidates WHERE user_id = ?`, [userId]);
+        const [candRows]: any = await connection.query(`SELECT * FROM candidates WHERE user_id = ?`, [userId]);
         if (candRows.length > 0) {
-            user.telefono = candRows[0].telefono;
-            user.cv_url = candRows[0].cv_url;
+            user = { ...user, ...candRows[0] };
         }
 
         const [appRows]: any = await connection.query(
@@ -54,9 +53,9 @@ export async function GET(request: Request) {
 
       // If it's an empresa, fetch their created job postings and applicants
       if (user.tipo_cuenta === 'empresa') {
-        const [compRows]: any = await connection.query(`SELECT telefono FROM companies WHERE user_id = ?`, [userId]);
+        const [compRows]: any = await connection.query(`SELECT * FROM companies WHERE user_id = ?`, [userId]);
         if (compRows.length > 0) {
-            user.telefono = compRows[0].telefono;
+            user = { ...user, ...compRows[0] };
         }
 
         // Fetch jobs created by this user

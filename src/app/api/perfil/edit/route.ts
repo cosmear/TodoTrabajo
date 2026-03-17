@@ -20,9 +20,17 @@ export async function PUT(request: Request) {
 
     // Parse data
     const data = await request.json();
-    const { nombre_completo, telefono } = data;
+    const { 
+      nombre_completo, telefono, 
+      // Candidate fields
+      descripcion, fecha_nacimiento, pais, provincia, ciudad, direccion,
+      areas_interes, disponibilidad, remuneracion_pretendida,
+      linkedin, twitter, instagram, tiktok,
+      // Company specific fields
+      nombre, email
+    } = data;
 
-    if (!nombre_completo) {
+    if (!nombre_completo && !nombre) {
         return NextResponse.json({ success: false, error: 'El nombre es obligatorio' }, { status: 400 });
     }
 
@@ -34,15 +42,38 @@ export async function PUT(request: Request) {
       if (userRows.length === 0) return NextResponse.json({ success: false, error: 'Usuario no encontrado' }, { status: 404 });
       const tipoCuenta = userRows[0].tipo_cuenta;
 
+      // Update base users table
       await connection.query(
         `UPDATE users SET nombre_completo = ? WHERE id = ?`,
-        [nombre_completo, userId]
+        [nombre_completo || nombre, userId]
       );
       
       if (tipoCuenta === 'candidato') {
-          await connection.query(`UPDATE candidates SET telefono = ?, nombre_apellido = ? WHERE user_id = ?`, [telefono || null, nombre_completo, userId]);
+          await connection.query(
+            `UPDATE candidates SET 
+                nombre_apellido = ?, telefono = ?, descripcion = ?, fecha_nacimiento = ?,
+                pais = ?, provincia = ?, ciudad = ?, direccion = ?, areas_interes = ?,
+                disponibilidad = ?, remuneracion_pretendida = ?, linkedin = ?,
+                twitter = ?, instagram = ?, tiktok = ?
+             WHERE user_id = ?`, 
+            [
+                nombre_completo, telefono || null, descripcion || '', fecha_nacimiento || null,
+                pais || '', provincia || '', ciudad || '', direccion || '', areas_interes || '',
+                disponibilidad || '', remuneracion_pretendida || 0, linkedin || '',
+                twitter || '', instagram || '', tiktok || '', userId
+            ]
+          );
       } else if (tipoCuenta === 'empresa') {
-          await connection.query(`UPDATE companies SET telefono = ?, nombre = ? WHERE user_id = ?`, [telefono || null, nombre_completo, userId]);
+          await connection.query(
+            `UPDATE companies SET 
+                nombre = ?, telefono = ?, descripcion = ?, email = ?,
+                pais = ?, provincia = ?, ciudad = ?, direccion = ?
+             WHERE user_id = ?`, 
+            [
+                nombre || nombre_completo, telefono || null, descripcion || '', email || '',
+                pais || '', provincia || '', ciudad || '', direccion || '', userId
+            ]
+          );
       }
 
       return NextResponse.json({ success: true, message: 'Perfil actualizado' });
