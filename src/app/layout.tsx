@@ -9,6 +9,7 @@ const manrope = Manrope({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "700", "800"],
+  preload: false,
 });
 
 export const metadata: Metadata = {

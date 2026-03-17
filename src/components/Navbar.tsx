@@ -6,11 +6,18 @@ import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const [isLogged, setIsLogged] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("tt_session");
     if (token) {
       setIsLogged(true);
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.tipoCuenta === "admin") {
+          setIsAdmin(true);
+        }
+      } catch (e) {}
     }
   }, []);
 
@@ -45,6 +52,14 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {isLogged ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors bg-purple-500/10 px-3 py-1.5 rounded-lg border border-purple-500/20"
+                >
+                  Admin Panel
+                </Link>
+              )}
               <Link
                 href="/mi-perfil"
                 className="text-sm font-bold text-slate-300 hover:text-primary transition-colors"
