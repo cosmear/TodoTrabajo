@@ -16,9 +16,7 @@ export default function AuthModals() {
     if (registerType === "candidato") {
       router.push("/registro-candidato");
     } else {
-      // Por ahora para empresa no hay ruta o asumimos algun placeholder
-      // router.push("/registro-empresa"); 
-      alert("Registro de empresa próximamente");
+      router.push("/registro-empresa"); 
     }
   };
 
