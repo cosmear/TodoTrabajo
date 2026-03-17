@@ -88,8 +88,8 @@ export default function AuthModals() {
       if (data.success) {
         localStorage.setItem("tt_session", data.token);
         document.getElementById("login-modal")?.classList.add("hidden");
-        // Refrescamos la pagina o ruteamos a mi-perfil
-        window.location.reload(); 
+        // Ruteamos a mi-perfil
+        router.push("/mi-perfil");
       } else {
         setLogError(data.error);
       }
