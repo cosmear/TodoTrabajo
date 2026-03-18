@@ -118,6 +118,26 @@ export default function MiPerfil() {
     }
   };
 
+  const handleStatusChange = async (applicationId: number, currentStatus: string, newStatus: string) => {
+    if (currentStatus === newStatus) return;
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/postulaciones/estado", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ applicationId, newStatus })
+      });
+      if (res.ok) {
+        // Refresh local UI state
+        fetchProfile();
+      } else {
+        alert("Error al actualizar estado.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0f1618] flex items-center justify-center pt-20">
@@ -342,10 +362,22 @@ export default function MiPerfil() {
 
                                         <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
                                            <span className="text-xs text-slate-500">{new Date(app.created_at).toLocaleDateString()}</span>
-                                           <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300">
-                                              {app.status}
-                                           </span>
-                                        </div>
+                                           <select 
+                                              value={app.status || "Enviada"} 
+                                              onChange={(e) => handleStatusChange(app.application_id, app.status, e.target.value)}
+                                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider appearance-none cursor-pointer outline-none ${
+                                                app.status === 'Contratado' ? 'bg-green-500/20 text-green-500 border border-green-500/30' :
+                                                app.status === 'Rechazado' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
+                                                app.status === 'En Entrevista' ? 'bg-[#5b83e8]/20 text-[#5b83e8] border border-[#5b83e8]/30' :
+                                                'bg-slate-800 text-slate-300 border border-slate-700'
+                                              }`}
+                                            >
+                                              <option value="Enviada" className="bg-surface-dark text-slate-300">Enviada</option>
+                                              <option value="En Entrevista" className="bg-surface-dark text-[#5b83e8]">En Entrevista</option>
+                                              <option value="Contratado" className="bg-surface-dark text-green-500">Contratado</option>
+                                              <option value="Rechazado" className="bg-surface-dark text-red-500">Rechazado</option>
+                                            </select>
+                                         </div>
                                      </div>
                                   ))}
                                </div>

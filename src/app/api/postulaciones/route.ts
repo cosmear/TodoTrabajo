@@ -2,13 +2,41 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import jwt from 'jsonwebtoken';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const keyword = searchParams.get('keyword') || '';
+    const location = searchParams.get('location') || '';
+    const category = searchParams.get('category') || '';
+    const modalities = searchParams.get('modalities') || ''; // comma separated
+
     const connection = await pool.getConnection();
     try {
-      const [rows]: any = await connection.query(
-        `SELECT * FROM job_postings ORDER BY created_at DESC`
-      );
+      let query = `SELECT * FROM job_postings WHERE is_active = 1`;
+      const params: any[] = [];
+
+      if (keyword) {
+        query += ` AND (posicion LIKE ? OR empresa LIKE ?)`;
+        params.push(`%${keyword}%`, `%${keyword}%`);
+      }
+      if (location) {
+        query += ` AND (provincia LIKE ? OR pais LIKE ?)`;
+        params.push(`%${location}%`, `%${location}%`);
+      }
+      if (category) {
+        query += ` AND areas_interes LIKE ?`;
+        params.push(`%${category}%`);
+      }
+      if (modalities) {
+        const modArray = modalities.split(',');
+        const placeholders = modArray.map(() => '?').join(',');
+        query += ` AND disponibilidad IN (${placeholders})`;
+        params.push(...modArray);
+      }
+
+      query += ` ORDER BY created_at DESC`;
+
+      const [rows]: any = await connection.query(query, params);
       return NextResponse.json({ success: true, postulaciones: rows });
     } finally {
       connection.release();

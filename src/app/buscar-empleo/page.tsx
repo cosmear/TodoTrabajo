@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function BuscarEmpleo() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -9,22 +10,37 @@ export default function BuscarEmpleo() {
 
   const [applying, setApplying] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const res = await fetch("/api/postulaciones");
-        const data = await res.json();
-        if (data.success) {
-          setJobs(data.postulaciones);
-        }
-      } catch (error) {
-        console.error("Error cargando postulaciones:", error);
-      } finally {
-        setLoading(false);
+  const [modalities, setModalities] = useState<string[]>([]);
+  const [category, setCategory] = useState<string>("");
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("keyword", searchTerm);
+      if (locationTerm) params.append("location", locationTerm);
+      if (category) params.append("category", category);
+      if (modalities.length > 0) params.append("modalities", modalities.join(","));
+
+      const res = await fetch(`/api/postulaciones?${params.toString()}`);
+      const data = await res.json();
+      if (data.success) {
+        setJobs(data.postulaciones);
       }
-    };
+    } catch (error) {
+      console.error("Error cargando postulaciones:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [category, modalities]);
+
+  const handleSearchSubmit = () => {
+    fetchJobs();
+  };
 
   const handleApply = async (jobId: number) => {
     const token = localStorage.getItem("tt_session");
@@ -58,16 +74,9 @@ export default function BuscarEmpleo() {
     }
   };
 
-  const filteredJobs = jobs.filter((job) => {
-    const s = searchTerm.toLowerCase();
-    const l = locationTerm.toLowerCase();
-    const searchString = `${job.posicion} ${job.empresa}`.toLowerCase();
-    const locationString = `${job.provincia} ${job.pais}`.toLowerCase();
-
-    const matchesSearch = searchString.includes(s);
-    const matchesLocation = locationString.includes(l);
-    return matchesSearch && matchesLocation;
-  });
+  const toggleModality = (mod: string) => {
+     setModalities(prev => prev.includes(mod) ? prev.filter(m => m !== mod) : [...prev, mod]);
+  };
 
   return (
     <>
@@ -106,7 +115,7 @@ export default function BuscarEmpleo() {
                 onChange={(e) => setLocationTerm(e.target.value)}
               />
             </div>
-            <button className="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-xl transition-all">
+            <button onClick={handleSearchSubmit} className="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-xl transition-all">
               BUSCAR
             </button>
           </div>
@@ -124,6 +133,8 @@ export default function BuscarEmpleo() {
                 <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
                   <input
                     type="checkbox"
+                    checked={modalities.includes("Full-time")}
+                    onChange={() => toggleModality("Full-time")}
                     className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
                   />
                   Full-time
@@ -131,6 +142,8 @@ export default function BuscarEmpleo() {
                 <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
                   <input
                     type="checkbox"
+                    checked={modalities.includes("Part-time")}
+                    onChange={() => toggleModality("Part-time")}
                     className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
                   />
                   Part-time
@@ -138,9 +151,11 @@ export default function BuscarEmpleo() {
                 <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
                   <input
                     type="checkbox"
+                    checked={modalities.includes("Freelance")}
+                    onChange={() => toggleModality("Freelance")}
                     className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
                   />
-                  Remoto
+                  Freelance
                 </label>
               </div>
             </div>
@@ -149,24 +164,43 @@ export default function BuscarEmpleo() {
               <div className="space-y-3">
                 <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
                   <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                    type="radio"
+                    name="category"
+                    checked={category === ""}
+                    onChange={() => setCategory("")}
+                    className="w-4 h-4 border-slate-700 text-primary focus:ring-primary bg-surface-dark"
+                  />
+                  Todas
+                </label>
+                <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
+                  <input
+                    type="radio"
+                    name="category"
+                    checked={category === "Administrativo"}
+                    onChange={() => setCategory("Administrativo")}
+                    className="w-4 h-4 border-slate-700 text-primary focus:ring-primary bg-surface-dark"
                   />
                   Administrativo
                 </label>
                 <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
                   <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                    type="radio"
+                    name="category"
+                    checked={category === "Maestranza"}
+                    onChange={() => setCategory("Maestranza")}
+                    className="w-4 h-4 border-slate-700 text-primary focus:ring-primary bg-surface-dark"
                   />
                   Maestranza
                 </label>
                 <label className="flex items-center gap-3 text-slate-400 hover:text-primary cursor-pointer">
                   <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-slate-700 bg-surface-dark text-primary focus:ring-primary"
+                    type="radio"
+                    name="category"
+                    checked={category === "Tecnología"}
+                    onChange={() => setCategory("Tecnología")}
+                    className="w-4 h-4 border-slate-700 text-primary focus:ring-primary bg-surface-dark"
                   />
-                  Secretariado
+                  Tecnología
                 </label>
               </div>
             </div>
@@ -180,7 +214,7 @@ export default function BuscarEmpleo() {
                 <p>Cargando posiciones laborales...</p>
               </div>
             ) : (
-              filteredJobs.map((job) => (
+              jobs.map((job) => (
                 <div
                   key={job.id}
                   className="job-card bg-surface-dark p-6 rounded-2xl border border-slate-800 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[0_10px_30px_-10px_rgba(19,200,236,0.2)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
@@ -195,9 +229,9 @@ export default function BuscarEmpleo() {
                       <h3 className="text-xl font-bold text-white mb-1">
                         {job.posicion}
                       </h3>
-                      <p className="text-primary font-bold text-sm mb-2">
+                      <Link href={`/empresas/${job.user_id}`} className="inline-block text-primary font-bold text-sm mb-2 hover:underline">
                         {job.empresa}
-                      </p>
+                      </Link>
                       <div className="flex flex-wrap gap-4 text-xs text-slate-500">
                         <span className="flex items-center gap-1.5">
                           <span className="material-symbols-outlined text-sm">
@@ -232,7 +266,7 @@ export default function BuscarEmpleo() {
                 </div>
               ))
             )}
-            {filteredJobs.length === 0 && (
+            {jobs.length === 0 && (
               <div className="text-center py-12 text-slate-500">
                 No se encontraron empleos que coincidan con tu búsqueda.
               </div>
