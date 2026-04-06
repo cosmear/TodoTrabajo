@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Montserrat, Montserrat_Alternates } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthModals from "@/components/AuthModals";
 import "./globals.css";
 
-const manrope = Manrope({
+const montserrat = Montserrat({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
-  preload: false,
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const montserratAlt = Montserrat_Alternates({
+  variable: "--font-accent",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +38,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${manrope.variable} bg-background-dark text-slate-100 font-display overflow-x-hidden antialiased selection:bg-primary selection:text-background-dark flex flex-col min-h-screen`}
+        className={`${montserrat.variable} ${montserratAlt.variable} bg-background-dark text-slate-100 font-display overflow-x-hidden antialiased selection:bg-primary selection:text-background-dark flex flex-col min-h-screen`}
       >
         <Navbar />
         <main className="flex-grow">{children}</main>
@@ -41,4 +48,3 @@ export default function RootLayout({
     </html>
   );
 }
-

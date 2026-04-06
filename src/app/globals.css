@@ -7,7 +7,8 @@
   --color-background-dark: #111718;
   --color-surface-dark: #1c2527;
   
-  --font-display: "Manrope", sans-serif;
+  --font-display: "Montserrat", sans-serif;
+  --font-accent: "Montserrat Alternates", sans-serif;
   
   --background-image-hero-pattern: url('https://placeholder.pics/svg/300');
   --background-image-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));

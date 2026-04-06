@@ -17,5 +17,7 @@ CREATE TABLE IF NOT EXISTS job_postings (
     direccion VARCHAR(255) NOT NULL,
     visible_suscripcion BOOLEAN DEFAULT FALSE,
     requiere_salario BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

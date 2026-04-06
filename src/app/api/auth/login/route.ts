@@ -16,7 +16,9 @@ export async function POST(request: Request) {
 
     try {
       const [rows]: any = await connection.query(
-        `SELECT id, password_hash, tipo_cuenta, is_active FROM users WHERE email = ?`,
+        `SELECT id, nombre_completo, email, password_hash, tipo_cuenta, is_active
+         FROM users
+         WHERE email = ?`,
         [email]
       );
 

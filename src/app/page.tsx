@@ -1,11 +1,53 @@
 import Link from "next/link";
+import pool from "@/lib/db";
 
-export default function Home() {
+type LatestJob = {
+  id: number;
+  user_id: number;
+  empresa: string;
+  posicion: string;
+  provincia: string;
+  pais: string;
+  disponibilidad: string;
+  created_at: string;
+};
+
+export const dynamic = "force-dynamic";
+
+async function getLatestJobs(): Promise<LatestJob[]> {
+  let connection;
+
+  try {
+    connection = await pool.getConnection();
+    const [rows] = await connection.query(
+      `SELECT id, user_id, empresa, posicion, provincia, pais, disponibilidad, created_at
+       FROM job_postings
+       WHERE is_active = 1
+       ORDER BY created_at DESC
+       LIMIT 6`
+    );
+
+    return rows as LatestJob[];
+  } catch {
+    return [];
+  } finally {
+    connection?.release();
+  }
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(value));
+}
+
+export default async function Home() {
+  const latestJobs = await getLatestJobs();
+
   return (
     <>
-      {/* Hero Section */}
       <section className="relative min-h-screen pt-28 pb-20 flex items-center overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-background-dark via-[#101f22] to-[#0c1314] -z-20"></div>
         <div
           className="absolute inset-0 opacity-10 -z-10"
@@ -14,60 +56,56 @@ export default function Home() {
             backgroundSize: "40px 40px",
           }}
         ></div>
-        <div className="absolute top-0 right-0 w-2/3 h-full bg-primary/5 blur-[120px] rounded-full -z-10 transform translate-x-1/4"></div>
-        
+        <div className="absolute top-0 right-0 w-2/3 h-full bg-primary/5 blur-[120px] rounded-full -z-10 translate-x-1/4"></div>
+
         <div className="max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column: Content */}
           <div className="space-y-8 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-[0.3em]">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              Nueva Plataforma 2024
+              Busquedas activas
             </div>
-            <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-white">
-              Todo Trabajo <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-200">
-                Tu Futuro Aquí
+            <h1 className="font-accent text-5xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-white">
+              Todo Trabajo
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-200">
+                Tu futuro empieza hoy
               </span>
             </h1>
             <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
-              Plataforma exclusiva para Argentina, especializada en trabajos de
-              mandos medios: secretariado, personal de maestranza y
-              administrativos. Encuentra tu próximo desafío profesional o el
-              candidato ideal para tu empresa.
+              Plataforma enfocada en conectar empresas y candidatos con
+              busquedas reales. Explora oportunidades nuevas, publica vacantes y
+              hace visible tu perfil.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Link
                 href="/buscar-empleo"
-                className="bg-primary text-background-dark font-bold py-3.5 px-8 rounded-lg hover:bg-primary/90 transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(19,200,236,0.4)] inline-block"
+                className="bg-primary text-background-dark font-bold py-3.5 px-8 rounded-lg hover:bg-primary/90 transition-all hover:-translate-y-1 shadow-[0_0_20px_rgba(19,200,236,0.4)] inline-block"
               >
-                Buscar Empleo
+                Buscar empleo
               </Link>
               <Link
                 href="/buscar-talento"
                 className="bg-transparent border border-slate-600 text-white font-bold py-3.5 px-8 rounded-lg hover:border-primary hover:text-primary transition-all inline-block"
               >
-                Busco Personal
+                Busco personal
               </Link>
             </div>
-            {/* Stats */}
-            <div className="flex items-center gap-8 pt-8 border-t border-slate-800/50 mt-8">
-              <div>
-                <p className="text-3xl font-bold text-white">2.5k+</p>
-                <p className="text-sm text-slate-500">Empleos Activos</p>
+            <div className="grid sm:grid-cols-2 gap-5 pt-8 border-t border-slate-800/60">
+              <div className="rounded-2xl border border-slate-800 bg-surface-dark/60 px-5 py-4">
+                <p className="text-3xl font-bold text-white">{latestJobs.length}</p>
+                <p className="text-sm text-slate-500">Busquedas nuevas en portada</p>
               </div>
-              <div>
-                <p className="text-3xl font-bold text-white">800+</p>
-                <p className="text-sm text-slate-500">Empresas</p>
+              <div className="rounded-2xl border border-slate-800 bg-surface-dark/60 px-5 py-4">
+                <p className="text-3xl font-bold text-white">2</p>
+                <p className="text-sm text-slate-500">Planes disponibles</p>
               </div>
             </div>
           </div>
-          
-          {/* Right Column: Image */}
+
           <div className="relative lg:h-[600px] flex items-center justify-center">
-            <div className="relative z-10 w-full h-full rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl glow-border">
+            <div className="relative z-10 w-full h-full rounded-[2rem] overflow-hidden border border-slate-700/50 shadow-2xl glow-border">
               <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent z-20"></div>
               <div
-                className="w-full h-full bg-cover bg-center"
+                className="w-full h-full bg-cover bg-center scale-[1.02]"
                 data-alt="Professional woman in business attire smiling in a modern office environment"
                 style={{
                   backgroundImage:
@@ -75,176 +113,119 @@ export default function Home() {
                 }}
               ></div>
             </div>
-            {/* Decorative Elements */}
-            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-surface-dark border border-slate-700 rounded-xl flex items-center justify-center z-30 shadow-lg">
-              <span className="material-symbols-outlined text-4xl text-primary">
-                rocket_launch
-              </span>
+            <div className="absolute -bottom-8 -left-6 w-44 bg-surface-dark/95 border border-slate-700 rounded-2xl p-5 z-30 shadow-lg backdrop-blur-sm">
+              <p className="text-xs uppercase tracking-[0.25em] text-primary mb-2">
+                Plan premium
+              </p>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Facilitar la busqueda de empleo y potenciar tu perfil para las
+                empresas.
+              </p>
             </div>
             <div className="absolute -top-6 -right-6 w-40 h-40 bg-primary/10 rounded-full blur-2xl z-0"></div>
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="py-24 relative bg-background-dark">
+      <section className="py-24 bg-background-dark border-t border-slate-800/70">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Nuestros Servicios
-            </h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Soluciones integrales diseñadas para potenciar el crecimiento
-              profesional y empresarial.
-            </p>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
+            <div className="max-w-2xl">
+              <p className="text-sm font-bold uppercase tracking-[0.32em] text-primary/80 mb-4">
+                Ultimas 6 busquedas
+              </p>
+              <h2 className="font-accent text-3xl md:text-4xl font-bold text-white mb-4">
+                Nuevas oportunidades publicadas por empresas
+              </h2>
+              <p className="text-slate-400 leading-relaxed">
+                Mostramos las busquedas mas recientes sin boton de postulacion
+                directa para que la portada sea mas limpia y se enfoque en lo
+                nuevo.
+              </p>
+            </div>
+            <Link
+              href="/buscar-empleo"
+              className="inline-flex items-center justify-center border border-slate-700 text-white font-bold px-6 py-3 rounded-xl hover:border-primary hover:text-primary transition-all"
+            >
+              Ver todas las busquedas
+            </Link>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="group relative bg-surface-dark p-8 rounded-2xl border border-slate-800 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-3xl"></div>
-              <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-background-dark transition-colors">
-                <span className="material-symbols-outlined text-2xl">
-                  person_search
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Reclutamiento</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Identificamos y seleccionamos el talento que mejor se adapta a la
-                cultura y necesidades técnicas de tu organización.
-              </p>
+
+          {latestJobs.length > 0 ? (
+            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {latestJobs.map((job) => (
+                <article
+                  key={job.id}
+                  className="group h-full rounded-[1.75rem] border border-slate-800 bg-surface-dark/80 p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
+                >
+                  <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] text-slate-500 mb-6">
+                    <span>Publicada</span>
+                    <span>{formatDate(job.created_at)}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-2xl font-bold text-white leading-tight">
+                      {job.posicion}
+                    </h3>
+                    <Link
+                      href={`/empresas/${job.user_id}`}
+                      className="inline-flex text-primary font-bold hover:underline"
+                    >
+                      {job.empresa}
+                    </Link>
+                    <p className="text-sm text-slate-400 leading-relaxed">
+                      Busqueda activa para {job.provincia}, {job.pais}. Modalidad:{" "}
+                      {job.disponibilidad}.
+                    </p>
+                  </div>
+                  <div className="mt-8 pt-5 border-t border-slate-800 flex items-center gap-5 text-sm text-slate-400">
+                    <span className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-base text-primary">
+                        location_on
+                      </span>
+                      {job.provincia}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-base text-primary">
+                        schedule
+                      </span>
+                      {job.disponibilidad}
+                    </span>
+                  </div>
+                </article>
+              ))}
             </div>
-            {/* Card 2 */}
-            <div className="group relative bg-surface-dark p-8 rounded-2xl border border-slate-800 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-3xl"></div>
-              <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-background-dark transition-colors">
-                <span className="material-symbols-outlined text-2xl">school</span>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Capacitación</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Programas de formación continua para desarrollar habilidades
-                blandas y técnicas en equipos de alto rendimiento.
+          ) : (
+            <div className="rounded-[2rem] border border-dashed border-slate-700 bg-surface-dark/40 px-8 py-14 text-center">
+              <p className="text-2xl font-bold text-white mb-3">
+                Todavia no hay busquedas nuevas para mostrar.
               </p>
-            </div>
-            {/* Card 3 */}
-            <div className="group relative bg-surface-dark p-8 rounded-2xl border border-slate-800 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-3xl"></div>
-              <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-background-dark transition-colors">
-                <span className="material-symbols-outlined text-2xl">
-                  corporate_fare
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Consultoría</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Asesoría experta en gestión de recursos humanos, clima laboral y
-                estrategias de retención de talento.
+              <p className="text-slate-400 mb-8">
+                Cuando se publiquen ofertas activas, esta seccion va a mostrar
+                automaticamente las 6 mas recientes.
               </p>
+              <Link
+                href="/crear-postulacion"
+                className="inline-flex items-center justify-center bg-primary text-background-dark font-bold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all"
+              >
+                Publicar una busqueda
+              </Link>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 bg-background-dark relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Testimonial 1 */}
-            <div className="bg-surface-dark border border-slate-800 p-8 rounded-xl shadow-lg relative glow-border">
-              <div className="flex text-yellow-400 mb-4">
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-              </div>
-              <p className="text-slate-300 mb-6 italic">
-                "Gracias a Todo Trabajo encontré el puesto de gerente que tanto
-                buscaba en menos de dos semanas."
-              </p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 bg-slate-700 rounded-full bg-cover bg-center"
-                  data-alt="Portrait of a smiling man"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD8wGldJELwg6OhNlcTPHL41xWXlKCT5NdU18INko324nKOFWY_aGkLJhHzs4AmpALvuZkMZ1xKcGv752gY0O_lywPLEh5Xe8q2UFp8azaBL9ffXI4L8pp_tlPnU1zuFSfjCk9Yq4IGOgMqky-anQf_ZDA7_h44Q1i69_sozQytxsmqAsH3rsfbSe1rpGP1wUgDnCHajPetlPN3HDEPcWIA8Dksly0aN3f0FBBrBrQMt8ppZfzMkdFWXB95iFyi80hzx1WxHU17v9M')",
-                  }}
-                ></div>
-                <div>
-                  <h4 className="text-white font-bold text-sm">Carlos Mendez</h4>
-                  <p className="text-slate-500 text-xs">Gerente de Ventas</p>
-                </div>
-              </div>
-            </div>
-            {/* Testimonial 2 */}
-            <div className="bg-surface-dark border border-slate-800 p-8 rounded-xl shadow-lg relative glow-border">
-              <div className="flex text-yellow-400 mb-4">
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-              </div>
-              <p className="text-slate-300 mb-6 italic">
-                "La plataforma es intuitiva y las ofertas son reales y de calidad.
-                Totalmente recomendada."
-              </p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 bg-slate-700 rounded-full bg-cover bg-center"
-                  data-alt="Portrait of a smiling woman"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB3uEctsAkVKzgM1lAM2cmn6VXiQb5eQw8hhrpnXQPNQhLirLFyDSgH4mUx0X4jBTY3zDtfidB4Veunreoi_I_Z4_SA-CwT2QyQSCA-I-TrAFdf-CnZwVsJVVNnwS0mFAOocFdq2rrYteQWVj_MBvay-y-HTFqej75vEUIJ0nfWui8v4zyBOYsiTPGDFuDL-SkxS23w7FxbYLBlWCIxw9b3EEXwpBtHR8Qc_cxiCPBzyXqSRM4CO1R2T76J7UlWjujz6kfo4xBmZgg')",
-                  }}
-                ></div>
-                <div>
-                  <h4 className="text-white font-bold text-sm">Ana Gómez</h4>
-                  <p className="text-slate-500 text-xs">Desarrolladora Web</p>
-                </div>
-              </div>
-            </div>
-            {/* Testimonial 3 */}
-            <div className="bg-surface-dark border border-slate-800 p-8 rounded-xl shadow-lg relative glow-border">
-              <div className="flex text-yellow-400 mb-4">
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">star</span>
-                <span className="material-symbols-outlined fill-current">
-                  star_half
-                </span>
-              </div>
-              <p className="text-slate-300 mb-6 italic">
-                "Como empresa, hemos reducido nuestros tiempos de contratación a la
-                mitad."
-              </p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 bg-slate-700 rounded-full bg-cover bg-center"
-                  data-alt="Portrait of a business executive"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBmGguwojFHHIbmAy8fMppCtz6_7n6YNSpWt3lLVKw2J_9rnFKquDoq2yMhVQB_mdtdona8g7yYJFQoelf5ZfcmWYq4J-19GzljlDVMo1i0LldTTtuRPhnAc_o1NXaG_pW5parrvJuZY2bcd0KwsXBA6eTIqgZTiYrgArniGLbLyUuCuA-3Ejfl331kX6qgDTtjlq10iGRNYDG3q8E2YrtRPfqH9Rk0lBQPJj2Dj_H8L0vySju_-d5T4tZYlTsfPacbs_iqJzmvKv8')",
-                  }}
-                ></div>
-                <div>
-                  <h4 className="text-white font-bold text-sm">Roberto Díaz</h4>
-                  <p className="text-slate-500 text-xs">Director RRHH</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
       <section className="py-24 bg-surface-dark border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-4">Contáctanos</h2>
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-primary/80 mb-4">
+              Contacto
+            </p>
+            <h2 className="font-accent text-3xl font-bold text-white mb-4">
+              Hablemos de tu proxima contratacion
+            </h2>
             <p className="text-slate-400 mb-8">
-              Déjanos tus datos y nos pondremos en contacto contigo para ayudarte
-              a encontrar lo que buscas.
+              Dejanos tus datos y te ayudamos a encontrar talento o a ordenar tu
+              proxima busqueda laboral.
             </p>
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4 text-slate-300">
@@ -271,17 +252,17 @@ export default function Home() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-1">
-                  Nombre Completo
+                  Nombre completo
                 </label>
                 <input
                   className="w-full bg-surface-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
-                  placeholder="Juan Pérez"
+                  placeholder="Juan Perez"
                   type="text"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-1">
-                  Correo Electrónico
+                  Correo electronico
                 </label>
                 <input
                   className="w-full bg-surface-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
@@ -295,7 +276,7 @@ export default function Home() {
                 </label>
                 <textarea
                   className="w-full bg-surface-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-600"
-                  placeholder="¿En qué podemos ayudarte?"
+                  placeholder="Contanos en que te podemos ayudar"
                   rows={4}
                 ></textarea>
               </div>
@@ -303,7 +284,7 @@ export default function Home() {
                 className="w-full bg-primary text-background-dark font-bold py-3 rounded-lg hover:bg-primary/90 transition-all"
                 type="button"
               >
-                Enviar Mensaje
+                Enviar mensaje
               </button>
             </div>
           </form>

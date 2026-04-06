@@ -8,5 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     tipo_cuenta VARCHAR(50) NOT NULL COMMENT 'candidato, empresa, o admin',
     is_active BOOLEAN DEFAULT TRUE,
+    reset_token VARCHAR(255) NULL,
+    reset_token_expires DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
