@@ -1,40 +1,42 @@
-import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from "next/server";
+import pool from "@/lib/db";
+import { getSessionFromRequest } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
+    const session = getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: "No autorizado" },
+        { status: 401 }
+      );
     }
-    const token = authHeader.split(' ')[1];
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecret123');
-    } catch (err) {
-      return NextResponse.json({ success: false, error: 'Token inválido' }, { status: 401 });
-    }
-    const userId = decoded.id;
 
+    if (session.tipoCuenta !== "empresa") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Solo los usuarios empresa pueden registrar una empresa",
+        },
+        { status: 403 }
+      );
+    }
+
+    const userId = session.id;
     const data = await request.json();
-    const {
-      nombre, descripcion, telefono, email,
-      pais, provincia, ciudad, direccion
-    } = data;
+    const { nombre, descripcion, telefono, email, pais, provincia, ciudad, direccion } = data;
 
     const connection = await pool.getConnection();
 
     try {
+      await connection.query(`DELETE FROM companies WHERE user_id = ?`, [userId]);
+
       const [result]: any = await connection.query(
         `INSERT INTO companies (
           user_id, nombre, descripcion, telefono, email,
           pais, provincia, ciudad, direccion
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          userId, nombre, descripcion, telefono, email,
-          pais, provincia, ciudad, direccion
-        ]
+        [userId, nombre, descripcion, telefono, email, pais, provincia, ciudad, direccion]
       );
 
       return NextResponse.json({ success: true, id: result.insertId });
@@ -42,9 +44,16 @@ export async function POST(request: Request) {
       connection.release();
     }
   } catch (error: any) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return NextResponse.json({ success: false, error: 'El email ya está registrado.' }, { status: 400 });
+    if (error.code === "ER_DUP_ENTRY") {
+      return NextResponse.json(
+        { success: false, error: "El email ya esta registrado." },
+        { status: 400 }
+      );
     }
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }

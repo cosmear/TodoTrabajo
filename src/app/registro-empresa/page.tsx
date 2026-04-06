@@ -20,7 +20,9 @@ export default function RegistroEmpresa() {
     direccion: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -30,9 +32,13 @@ export default function RegistroEmpresa() {
     setErrorMsg("");
 
     try {
+      const token = localStorage.getItem("tt_session");
       const response = await fetch("/api/empresas", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(formData),
       });
 
@@ -40,11 +46,11 @@ export default function RegistroEmpresa() {
         setSuccess(true);
       } else {
         const errorData = await response.json();
-        setErrorMsg(errorData.error || "Ocurrió un error al enviar el formulario.");
+        setErrorMsg(errorData.error || "Ocurrio un error al enviar el formulario.");
       }
     } catch (error) {
       console.error(error);
-      setErrorMsg("Hubo un problema de conexión.");
+      setErrorMsg("Hubo un problema de conexion.");
     } finally {
       setLoading(false);
     }
@@ -57,9 +63,10 @@ export default function RegistroEmpresa() {
           <span className="material-symbols-outlined text-6xl text-primary mb-4 block">
             check_circle
           </span>
-          <h2 className="text-3xl font-bold text-white mb-2">¡Empresa Registrada!</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Empresa registrada</h2>
           <p className="text-slate-400 mb-8">
-            Tu perfil como Empresa fue guardado con éxito. Ahora podrás empezar a subir búsquedas.
+            Tu perfil como Empresa fue guardado con exito. Ahora podras empezar a
+            subir busquedas.
           </p>
           <button
             onClick={() => router.push("/")}
@@ -82,7 +89,7 @@ export default function RegistroEmpresa() {
           </h1>
         </div>
         <p className="text-slate-400 text-center mb-8">
-          Llena los datos requeridos para poder postularte a las búsquedas
+          Llena los datos requeridos para poder postularte a las busquedas
         </p>
 
         {errorMsg && (
@@ -94,35 +101,93 @@ export default function RegistroEmpresa() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <input required name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="Nombre*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
-            </div>
-            
-            <div>
-              <textarea required name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={4} placeholder="Descripción*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
-            </div>
-
-            <div>
-              <input required name="telefono" value={formData.telefono} onChange={handleInputChange} placeholder="Telefono*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
-            </div>
-
-            <div>
-              <input type="email" required name="email" value={formData.email} onChange={handleInputChange} placeholder="Email*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
+              <input
+                required
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleInputChange}
+                placeholder="Nombre*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
             </div>
 
             <div>
-              <input required name="pais" value={formData.pais} onChange={handleInputChange} placeholder="Pais*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
+              <textarea
+                required
+                name="descripcion"
+                value={formData.descripcion}
+                onChange={handleInputChange}
+                rows={4}
+                placeholder="Descripcion*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
             </div>
 
             <div>
-              <input required name="provincia" value={formData.provincia} onChange={handleInputChange} placeholder="Provincia*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
+              <input
+                required
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleInputChange}
+                placeholder="Telefono*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
             </div>
 
             <div>
-              <input required name="ciudad" value={formData.ciudad} onChange={handleInputChange} placeholder="Ciudad*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
+              <input
+                type="email"
+                required
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Email*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
             </div>
 
             <div>
-              <input required name="direccion" value={formData.direccion} onChange={handleInputChange} placeholder="Dirección*" className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1" />
+              <input
+                required
+                name="pais"
+                value={formData.pais}
+                onChange={handleInputChange}
+                placeholder="Pais*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
+            </div>
+
+            <div>
+              <input
+                required
+                name="provincia"
+                value={formData.provincia}
+                onChange={handleInputChange}
+                placeholder="Provincia*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
+            </div>
+
+            <div>
+              <input
+                required
+                name="ciudad"
+                value={formData.ciudad}
+                onChange={handleInputChange}
+                placeholder="Ciudad*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
+            </div>
+
+            <div>
+              <input
+                required
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                placeholder="Direccion*"
+                className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-primary focus:ring-1"
+              />
             </div>
           </div>
 

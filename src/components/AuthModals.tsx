@@ -10,16 +10,24 @@ type LoginResponse = {
   error?: string;
   user?: {
     tipoCuenta?: "candidato" | "empresa" | "admin";
+    approvalStatus?: "pending" | "approved";
   };
 };
 
-function getRouteByAccountType(tipoCuenta: string) {
+function getRouteByAccountType(
+  tipoCuenta: string,
+  approvalStatus?: "pending" | "approved"
+) {
   if (tipoCuenta === "empresa") {
     return "/buscar-talento";
   }
 
   if (tipoCuenta === "admin") {
     return "/admin";
+  }
+
+  if (tipoCuenta === "candidato" && approvalStatus === "pending") {
+    return "/mi-perfil";
   }
 
   return "/buscar-empleo";
@@ -69,7 +77,12 @@ export default function AuthModals() {
         localStorage.setItem("tt_session", data.token);
         document.getElementById("register-modal")?.classList.add("hidden");
         window.dispatchEvent(new Event("tt-session-changed"));
-        router.push(getRouteByAccountType(registerType));
+        if (data.user?.approvalStatus === "pending") {
+          alert("Tu cuenta quedo pendiente de aprobacion del administrador.");
+        }
+        router.push(
+          getRouteByAccountType(registerType, data.user?.approvalStatus)
+        );
         router.refresh();
       } else {
         setRegError(data.error || "No se pudo crear la cuenta.");
@@ -98,7 +111,15 @@ export default function AuthModals() {
         localStorage.setItem("tt_session", data.token);
         document.getElementById("login-modal")?.classList.add("hidden");
         window.dispatchEvent(new Event("tt-session-changed"));
-        router.push(getRouteByAccountType(data.user?.tipoCuenta || "candidato"));
+        if (data.user?.approvalStatus === "pending") {
+          alert("Tu cuenta esta pendiente de aprobacion del administrador.");
+        }
+        router.push(
+          getRouteByAccountType(
+            data.user?.tipoCuenta || "candidato",
+            data.user?.approvalStatus
+          )
+        );
         router.refresh();
       } else {
         setLogError(data.error || "No se pudo iniciar sesion.");

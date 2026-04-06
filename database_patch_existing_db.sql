@@ -19,6 +19,17 @@ BEGIN
     FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA = DATABASE()
       AND TABLE_NAME = 'users'
+      AND COLUMN_NAME = 'approval_status'
+  ) THEN
+    ALTER TABLE users
+      ADD COLUMN approval_status VARCHAR(20) NOT NULL DEFAULT 'approved' AFTER is_active;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'users'
       AND COLUMN_NAME = 'reset_token'
   ) THEN
     ALTER TABLE users
@@ -45,6 +56,17 @@ BEGIN
   ) THEN
     ALTER TABLE job_postings
       ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 AFTER requiere_salario;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'job_postings'
+      AND COLUMN_NAME = 'approval_status'
+  ) THEN
+    ALTER TABLE job_postings
+      ADD COLUMN approval_status VARCHAR(20) NOT NULL DEFAULT 'pending' AFTER is_active;
   END IF;
 
   IF NOT EXISTS (

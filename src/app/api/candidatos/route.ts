@@ -1,34 +1,65 @@
-import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from "next/server";
+import pool from "@/lib/db";
+import { getSessionFromRequest } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 });
+    const session = getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: "No autorizado" },
+        { status: 401 }
+      );
     }
-    const token = authHeader.split(' ')[1];
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecret123');
-    } catch (err) {
-      return NextResponse.json({ success: false, error: 'Token inválido' }, { status: 401 });
-    }
-    const userId = decoded.id;
 
+    if (session.tipoCuenta !== "candidato") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Solo los usuarios candidatos pueden crear este perfil",
+        },
+        { status: 403 }
+      );
+    }
+
+    const userId = session.id;
     const data = await request.json();
     const {
-      nombre_apellido, descripcion, fecha_nacimiento, telefono, pais,
-      provincia, ciudad, direccion, areas_interes, disponibilidad,
-      remuneracion_pretendida, linkedin, twitter, instagram, tiktok,
-      positions, companies
+      nombre_apellido,
+      descripcion,
+      fecha_nacimiento,
+      telefono,
+      pais,
+      provincia,
+      ciudad,
+      direccion,
+      areas_interes,
+      disponibilidad,
+      remuneracion_pretendida,
+      linkedin,
+      twitter,
+      instagram,
+      tiktok,
+      positions,
+      companies,
     } = data;
 
     const connection = await pool.getConnection();
 
     try {
       await connection.beginTransaction();
+
+      await connection.query(
+        `DELETE FROM candidate_positions
+         WHERE candidate_id IN (SELECT id FROM candidates WHERE user_id = ?)`,
+        [userId]
+      );
+      await connection.query(
+        `DELETE FROM candidate_companies
+         WHERE candidate_id IN (SELECT id FROM candidates WHERE user_id = ?)`,
+        [userId]
+      );
+      await connection.query(`DELETE FROM candidates WHERE user_id = ?`, [userId]);
 
       const [result]: any = await connection.query(
         `INSERT INTO candidates (
@@ -37,10 +68,22 @@ export async function POST(request: Request) {
           remuneracion_pretendida, linkedin, twitter, instagram, tiktok
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          userId, nombre_apellido, descripcion, fecha_nacimiento, telefono, pais || '',
-          provincia, ciudad, direccion, areas_interes, disponibilidad,
-          remuneracion_pretendida || 0, linkedin || '', twitter || '',
-          instagram || '', tiktok || ''
+          userId,
+          nombre_apellido,
+          descripcion,
+          fecha_nacimiento,
+          telefono,
+          pais || "",
+          provincia,
+          ciudad,
+          direccion,
+          areas_interes,
+          disponibilidad,
+          remuneracion_pretendida || 0,
+          linkedin || "",
+          twitter || "",
+          instagram || "",
+          tiktok || "",
         ]
       );
 
@@ -62,8 +105,17 @@ export async function POST(request: Request) {
         );
       }
 
+      const [userRows]: any = await connection.query(
+        `SELECT approval_status FROM users WHERE id = ?`,
+        [userId]
+      );
+
       await connection.commit();
-      return NextResponse.json({ success: true, id: candidateId });
+      return NextResponse.json({
+        success: true,
+        id: candidateId,
+        approvalStatus: userRows[0]?.approval_status || "pending",
+      });
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -71,6 +123,9 @@ export async function POST(request: Request) {
       connection.release();
     }
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }

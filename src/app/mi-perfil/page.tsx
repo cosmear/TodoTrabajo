@@ -178,6 +178,15 @@ export default function MiPerfil() {
                  <div className="overflow-hidden">
                     <h2 className="text-white font-bold truncate">{profile.user?.nombre_completo}</h2>
                     <p className="text-slate-400 text-xs truncate capitalize mb-1">{profile.user?.tipo_cuenta}</p>
+                    {profile.user?.tipo_cuenta === "candidato" && (
+                       <span className={`inline-flex px-2 py-1 rounded text-[10px] font-bold border ${
+                         profile.user?.approval_status === "pending"
+                           ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                           : "bg-green-500/10 text-green-500 border-green-500/20"
+                       }`}>
+                          {profile.user?.approval_status === "pending" ? "Pendiente de aprobacion" : "Aprobado"}
+                       </span>
+                    )}
                     {profile.user?.ciudad && profile.user?.pais && (
                        <p className="text-slate-500 text-[10px] flex items-center gap-1">
                           <span className="material-symbols-outlined text-[12px]">location_on</span>
@@ -256,6 +265,12 @@ export default function MiPerfil() {
                    </div>
                 </div>
 
+                {profile.user?.approval_status === "pending" && (
+                  <div className="mb-6 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-2xl p-5">
+                    Tu cuenta candidata esta pendiente de aprobacion del administrador. Mientras tanto puedes completar tu perfil, pero no podras postularte hasta que quede aprobada.
+                  </div>
+                )}
+
                 {profile.applications?.length === 0 ? (
                   <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500">
                     No tienes ninguna postulación activa por el momento. <br/><br/>
@@ -319,8 +334,17 @@ export default function MiPerfil() {
                                   </span>
                                </div>
                             </div>
-                            <div className="bg-[#3b5acc]/20 text-[#5b83e8] px-3 py-1 rounded-full text-xs font-bold border border-[#5b83e8]/30">
-                               {job.applications?.length || 0} Postulantes
+                            <div className="flex items-center gap-2">
+                               <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                                 job.approval_status === "pending"
+                                   ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                   : "bg-green-500/10 text-green-500 border-green-500/20"
+                               }`}>
+                                  {job.approval_status === "pending" ? "Pendiente" : "Aprobado"}
+                               </div>
+                               <div className="bg-[#3b5acc]/20 text-[#5b83e8] px-3 py-1 rounded-full text-xs font-bold border border-[#5b83e8]/30">
+                                  {job.applications?.length || 0} Postulantes
+                               </div>
                             </div>
                          </div>
                          <div className="p-0">

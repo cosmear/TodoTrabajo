@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS job_postings (
     visible_suscripcion BOOLEAN DEFAULT FALSE,
     requiere_salario BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
+    approval_status VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT 'pending o approved',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

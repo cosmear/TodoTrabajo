@@ -22,7 +22,7 @@ async function getLatestJobs(): Promise<LatestJob[]> {
     const [rows] = await connection.query(
       `SELECT id, user_id, empresa, posicion, provincia, pais, disponibilidad, created_at
        FROM job_postings
-       WHERE is_active = 1
+       WHERE is_active = 1 AND approval_status = 'approved'
        ORDER BY created_at DESC
        LIMIT 6`
     );
