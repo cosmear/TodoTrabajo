@@ -65,9 +65,12 @@ export default function Navbar() {
 
   const isLogged = accountType !== null;
   
-  if (isLogged) return null;
+  const hideOnPaths = ["/mi-perfil", "/admin"];
+  if (isLogged && hideOnPaths.some((p) => pathname.startsWith(p))) {
+    return null;
+  }
 
-  const currentLinks = publicLinks;
+  const currentLinks = (isLogged && accountType) ? privateLinksByType[accountType] : publicLinks;
 
   const linkClassName = (href: string) =>
     `text-sm font-semibold transition-colors ${
