@@ -18,19 +18,12 @@ function getRouteByAccountType(
   tipoCuenta: string,
   approvalStatus?: "pending" | "approved"
 ) {
-  if (tipoCuenta === "empresa") {
-    return "/buscar-talento";
-  }
-
   if (tipoCuenta === "admin") {
     return "/admin";
   }
 
-  if (tipoCuenta === "candidato" && approvalStatus === "pending") {
-    return "/mi-perfil";
-  }
-
-  return "/buscar-empleo";
+  // Tanto empresas como candidatos van directamente a su panel principal
+  return "/mi-perfil";
 }
 
 export default function AuthModals() {

@@ -70,7 +70,8 @@ export default function Navbar() {
     return null;
   }
 
-  const currentLinks = (isLogged && accountType) ? privateLinksByType[accountType] : publicLinks;
+  // Siempre mostramos los mismos links públicos "Inicio, Somos, Servicios, Contacto"
+  const currentLinks = publicLinks;
 
   const linkClassName = (href: string) =>
     `text-sm font-semibold transition-colors ${
@@ -111,12 +112,20 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3">
             {isLogged ? (
-              <button
-                onClick={handleLogout}
-                className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold py-2.5 px-5 rounded-lg transition-all border border-red-500/20"
-              >
-                Salir
-              </button>
+              <>
+                <Link
+                  href={accountType === "admin" ? "/admin" : "/mi-perfil"}
+                  className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-sm font-bold py-2.5 px-5 rounded-lg transition-all"
+                >
+                  Mi Perfil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold py-2.5 px-5 rounded-lg transition-all border border-red-500/20"
+                >
+                  Cerrar Sesión
+                </button>
+              </>
             ) : (
               <>
                 <button
