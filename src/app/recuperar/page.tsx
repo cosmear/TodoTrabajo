@@ -33,9 +33,9 @@ export default function RecuperarContrasena() {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-20 bg-gradient-to-b from-background-dark to-[#0f1618] flex items-center justify-center p-4">
+    <div className="min-h-screen pt-32 pb-20 bg-linear-to-b from-background-dark to-[#0f1618] flex items-center justify-center p-4">
        <div className="max-w-md w-full bg-surface-dark border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-[#5b83e8]"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-[#5b83e8]"></div>
           <div className="text-center mb-8">
              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
                 <span className="material-symbols-outlined text-3xl">key</span>

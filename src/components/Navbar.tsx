@@ -64,7 +64,10 @@ export default function Navbar() {
   }, [pathname]);
 
   const isLogged = accountType !== null;
-  const currentLinks = isLogged ? privateLinksByType[accountType] : publicLinks;
+  
+  if (isLogged) return null;
+
+  const currentLinks = publicLinks;
 
   const linkClassName = (href: string) =>
     `text-sm font-semibold transition-colors ${

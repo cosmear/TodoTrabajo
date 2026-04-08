@@ -81,7 +81,7 @@ export default function BuscarEmpleo() {
   return (
     <>
       {/* Hero / Search Section */}
-      <section className="pt-40 pb-20 bg-gradient-to-b from-background-dark to-[#0f1618]">
+      <section className="pt-40 pb-20 bg-linear-to-b from-background-dark to-[#0f1618]">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">
             Encontrá tu próximo <span className="text-primary">desafío</span>
@@ -220,7 +220,7 @@ export default function BuscarEmpleo() {
                   className="job-card bg-surface-dark p-6 rounded-2xl border border-slate-800 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[0_10px_30px_-10px_rgba(19,200,236,0.2)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
                 >
                   <div className="flex gap-6">
-                    <div className="w-16 h-16 bg-background-dark rounded-xl flex items-center justify-center flex-shrink-0 text-primary border border-slate-700">
+                    <div className="w-16 h-16 bg-background-dark rounded-xl flex items-center justify-center shrink-0 text-primary border border-slate-700">
                       <span className="material-symbols-outlined text-3xl">
                         work
                       </span>

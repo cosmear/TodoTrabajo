@@ -48,7 +48,7 @@ export default async function Home() {
   return (
     <>
       <section className="relative min-h-screen pt-28 pb-20 flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-background-dark via-[#101f22] to-[#0c1314] -z-20"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-background-dark via-[#101f22] to-[#0c1314] -z-20"></div>
         <div
           className="absolute inset-0 opacity-10 -z-10"
           style={{
@@ -66,7 +66,7 @@ export default async function Home() {
             </div>
             <h1 className="font-accent text-5xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-white">
               Todo Trabajo
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-200">
+              <span className="block text-transparent bg-clip-text bg-linear-to-r from-primary to-cyan-200">
                 Tu futuro empieza hoy
               </span>
             </h1>
@@ -102,8 +102,8 @@ export default async function Home() {
           </div>
 
           <div className="relative lg:h-[600px] flex items-center justify-center">
-            <div className="relative z-10 w-full h-full rounded-[2rem] overflow-hidden border border-slate-700/50 shadow-2xl glow-border">
-              <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent z-20"></div>
+            <div className="relative z-10 w-full h-full rounded-4xl overflow-hidden border border-slate-700/50 shadow-2xl glow-border">
+              <div className="absolute inset-0 bg-linear-to-t from-background-dark via-transparent to-transparent z-20"></div>
               <div
                 className="w-full h-full bg-cover bg-center scale-[1.02]"
                 data-alt="Professional woman in business attire smiling in a modern office environment"
@@ -195,7 +195,7 @@ export default async function Home() {
               ))}
             </div>
           ) : (
-            <div className="rounded-[2rem] border border-dashed border-slate-700 bg-surface-dark/40 px-8 py-14 text-center">
+            <div className="rounded-4xl border border-dashed border-slate-700 bg-surface-dark/40 px-8 py-14 text-center">
               <p className="text-2xl font-bold text-white mb-3">
                 Todavia no hay busquedas nuevas para mostrar.
               </p>

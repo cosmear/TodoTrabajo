@@ -2,10 +2,10 @@ export default function Somos() {
   return (
     <>
       <section className="relative pt-40 pb-20 flex items-center overflow-hidden bg-background-dark min-h-[50vh]">
-        <div className="absolute inset-0 bg-gradient-to-br from-background-dark via-[#101f22] to-[#0c1314] -z-20"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-background-dark via-[#101f22] to-[#0c1314] -z-20"></div>
         <div className="max-w-7xl mx-auto px-6 w-full text-center relative z-10">
           <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-white mb-6">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-200">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-cyan-200">
               Somos
             </span>{" "}
             Todo Trabajo

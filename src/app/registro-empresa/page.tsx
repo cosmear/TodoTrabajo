@@ -80,10 +80,10 @@ export default function RegistroEmpresa() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-dark to-[#0f1618] pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-linear-to-b from-background-dark to-[#0f1618] pt-32 pb-20 px-4">
       <div className="max-w-2xl mx-auto bg-surface-dark border border-slate-800 p-8 rounded-2xl shadow-2xl">
         <div className="flex justify-center items-center gap-4 mb-4">
-          <div className="w-8 h-8 rounded-full bg-primary flex-shrink-0"></div>
+          <div className="w-8 h-8 rounded-full bg-primary shrink-0"></div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-primary">
             Mi empresa
           </h1>

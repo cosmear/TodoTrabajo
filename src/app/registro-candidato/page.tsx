@@ -131,7 +131,7 @@ export default function RegistroCandidato() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-dark to-[#0f1618] pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-linear-to-b from-background-dark to-[#0f1618] pt-32 pb-20 px-4">
       <div className="max-w-3xl mx-auto bg-surface-dark border border-slate-800 p-8 rounded-2xl shadow-2xl">
         <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2 text-center">
           Perfil de <span className="text-primary">Candidato</span>

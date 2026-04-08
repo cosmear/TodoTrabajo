@@ -57,9 +57,9 @@ export default function Servicios() {
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className="relative rounded-[2rem] border border-slate-800 bg-surface-dark p-8 md:p-10 overflow-hidden"
+              className="relative rounded-4xl border border-slate-800 bg-surface-dark p-8 md:p-10 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-br from-primary/8 via-transparent to-transparent"></div>
               <div className="relative z-10">
                 <div className="flex items-start justify-between gap-6 mb-8">
                   <div>

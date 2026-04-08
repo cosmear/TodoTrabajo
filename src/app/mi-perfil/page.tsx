@@ -164,15 +164,18 @@ export default function MiPerfil() {
      );
   }
 
+  const wpMessage = `Hola, acabo de presionar el botón de asistencia en la web-app de todo trabajo. mi nombre es: "${profile?.user?.nombre_completo || ''}", tengo perfil de: "${profile?.user?.tipo_cuenta || ''}" y quiero asistencia con: `;
+  const wpUrl = `https://wa.me/5491166554414?text=${encodeURIComponent(wpMessage)}`;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-dark to-[#0f1618] pt-24 pb-20">
+    <div className="min-h-screen bg-linear-to-b from-background-dark to-[#0f1618] pt-10 pb-20">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 px-4">
         
         {/* Sidebar */}
-        <div className="w-full md:w-64 flex-shrink-0">
-           <div className="bg-surface-dark border border-slate-800 rounded-2xl p-6 sticky top-28 shadow-2xl">
+        <div className="w-full md:w-64 shrink-0">
+           <div className="bg-surface-dark border border-slate-800 rounded-2xl p-6 sticky top-10 shadow-2xl">
               <div className="flex items-center gap-4 mb-4">
-                 <div className="w-12 h-12 bg-primary flex-shrink-0 rounded-full flex items-center justify-center text-background-dark text-xl font-bold shadow-[0_0_15px_rgba(19,200,236,0.3)]">
+                 <div className="w-12 h-12 bg-primary shrink-0 rounded-full flex items-center justify-center text-background-dark text-xl font-bold shadow-[0_0_15px_rgba(19,200,236,0.3)]">
                     {profile.user?.nombre_completo?.charAt(0).toUpperCase()}
                  </div>
                  <div className="overflow-hidden">
@@ -218,15 +221,18 @@ export default function MiPerfil() {
                        <button onClick={() => setActiveTab('inicio')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'inicio' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
                           <span className="material-symbols-outlined text-[20px]">person</span> Inicio
                        </button>
-                       <button onClick={() => setActiveTab('asistencia')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'asistencia' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                       <a href={wpUrl} target="_blank" rel="noopener noreferrer" className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white">
                           <span className="material-symbols-outlined text-[20px]">support_agent</span> Asistencia
-                       </button>
+                       </a>
                     </>
                  ) : (
                     <>
                        <button onClick={() => setActiveTab('empresa')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'empresa' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
                           <span className="material-symbols-outlined text-[20px]">business_center</span> Empresa
                        </button>
+                       <a href={wpUrl} target="_blank" rel="noopener noreferrer" className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white">
+                          <span className="material-symbols-outlined text-[20px]">support_agent</span> Asistencia
+                       </a>
                        <button onClick={() => setActiveTab('buscar_candidatos')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'buscar_candidatos' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
                           <span className="material-symbols-outlined text-[20px]">search</span> Buscar Candidatos
                        </button>
@@ -236,7 +242,7 @@ export default function MiPerfil() {
                     <span className="material-symbols-outlined text-[20px]">lock</span> Cambiar Contraseña
                  </button>
                  <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-red-500/80 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[20px]">logout</span> Salir
+                    <span className="material-symbols-outlined text-[20px]">logout</span> Cerrar sesión
                  </button>
               </div>
            </div>
@@ -261,6 +267,10 @@ export default function MiPerfil() {
                       <button onClick={() => fileInputRef.current?.click()} disabled={uploadingCv} className="bg-surface-dark border border-slate-700 hover:border-primary/50 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-all flex items-center gap-2">
                          <span className="material-symbols-outlined text-[18px]">upload_file</span>
                          {uploadingCv ? 'Subiendo...' : 'Subir CV (PDF/Word)'}
+                      </button>
+                      <button onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold py-2.5 px-4 rounded-lg transition-all border border-red-500/20 flex items-center gap-2">
+                         <span className="material-symbols-outlined text-[18px]">logout</span>
+                         Cerrar sesión
                       </button>
                    </div>
                 </div>
@@ -292,7 +302,7 @@ export default function MiPerfil() {
                                </span>
                             </div>
                          </div>
-                         <div className="flex items-center gap-2 bg-green-500/10 text-green-500 border border-green-500/20 px-4 py-2 rounded-lg text-sm font-bold flex-shrink-0">
+                         <div className="flex items-center gap-2 bg-green-500/10 text-green-500 border border-green-500/20 px-4 py-2 rounded-lg text-sm font-bold shrink-0">
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>
                             {app.status}
                          </div>
@@ -308,9 +318,15 @@ export default function MiPerfil() {
              <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
                    <h1 className="text-3xl font-extrabold text-white">Dashboard de tu Empresa</h1>
-                   <Link href="/crear-postulacion" className="bg-[#5b83e8] hover:bg-[#4a6dc6] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(91,131,232,0.4)] flex items-center gap-2">
-                      <span className="material-symbols-outlined">add_circle</span> CREAR EMPLEO
-                   </Link>
+                   <div className="flex items-center gap-3">
+                     <Link href="/crear-postulacion" className="bg-[#5b83e8] hover:bg-[#4a6dc6] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(91,131,232,0.4)] flex items-center gap-2">
+                        <span className="material-symbols-outlined">add_circle</span> CREAR EMPLEO
+                     </Link>
+                     <button onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold py-3 px-6 rounded-xl transition-all border border-red-500/20 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">logout</span>
+                        Cerrar sesión
+                     </button>
+                   </div>
                 </div>
 
                 {profile.companyJobs?.length === 0 ? (
@@ -356,7 +372,7 @@ export default function MiPerfil() {
                                      <div key={app.application_id} className="p-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/20 transition-colors">
                                         
                                         <div className="flex items-center gap-4">
-                                           <div className="w-10 h-10 bg-slate-700 flex-shrink-0 rounded-full flex items-center justify-center text-white font-bold">
+                                           <div className="w-10 h-10 bg-slate-700 shrink-0 rounded-full flex items-center justify-center text-white font-bold">
                                               {app.nombre_completo.charAt(0).toUpperCase()}
                                            </div>
                                            <div>
@@ -414,13 +430,6 @@ export default function MiPerfil() {
              </div>
           )}
 
-          {/* TAB: CANDIDATO - ASISTENCIA */}
-          {activeTab === 'asistencia' && (
-             <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500">
-                <span className="material-symbols-outlined text-4xl mb-4">support_agent</span>
-                <p>Centro de asistencia en desarrollo...</p>
-             </div>
-          )}
 
           {/* TAB: EMPRESA - BUSCAR CANDIDATOS */}
           {activeTab === 'buscar_candidatos' && (
@@ -435,7 +444,7 @@ export default function MiPerfil() {
 
       {/* Edit Profile Modal */}
       {showEditModal && (
-         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
             <div className="relative bg-surface-dark rounded-2xl border border-slate-800 shadow-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto z-10 custom-scrollbar">
                <button onClick={() => setShowEditModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/50 p-1 rounded-full">
@@ -456,7 +465,7 @@ export default function MiPerfil() {
                         </div>
                         <div>
                            <label className="block text-sm text-slate-400 mb-1">Fecha de Nacimiento</label>
-                           <input type="date" name="fecha_nacimiento" value={(editData as any).fecha_nacimiento ? new Date((editData as any).fecha_nacimiento).toISOString().split('T')[0] : ''} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none [color-scheme:dark]" />
+                           <input type="date" name="fecha_nacimiento" value={(editData as any).fecha_nacimiento ? new Date((editData as any).fecha_nacimiento).toISOString().split('T')[0] : ''} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none scheme-dark" />
                         </div>
                         <div>
                            <label className="block text-sm text-slate-400 mb-1">Teléfono (Ej: +54911223344)</label>
