@@ -114,7 +114,7 @@ export default function CanalDifusion() {
 
               <div className="space-y-10 mt-12">
                 <div className="flex gap-6 group">
-                  <div className="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
                     1
                   </div>
                   <div>
@@ -129,7 +129,7 @@ export default function CanalDifusion() {
                   </div>
                 </div>
                 <div className="flex gap-6 group">
-                  <div className="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
                     2
                   </div>
                   <div>
@@ -144,7 +144,7 @@ export default function CanalDifusion() {
                   </div>
                 </div>
                 <div className="flex gap-6 group">
-                  <div className="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 bg-primary text-background-dark rounded-full flex items-center justify-center font-bold text-2xl shrink-0 shadow-[0_0_20px_rgba(19,200,236,0.5)] group-hover:scale-110 transition-transform">
                     3
                   </div>
                   <div>
@@ -161,14 +161,14 @@ export default function CanalDifusion() {
               </div>
             </div>
             {/* Image/Graphic */}
-            <div className="md:w-1/2 relative animate-fade-in-up delay-[400ms]">
+            <div className="md:w-1/2 relative animate-fade-in-up delay-400">
               {/* Phone Container with Hover Rotation */}
               <div className="relative max-w-[320px] mx-auto floating transform -rotate-3 hover:rotate-0 transition-transform duration-700 ease-out z-10 cursor-pointer group">
                 {/* Blobs / Glows around phone */}
-                <div className="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-green-500/30 rounded-[3rem] blur-2xl -z-10 opacity-70 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -inset-4 bg-linear-to-tr from-primary/30 to-green-500/30 rounded-[3rem] blur-2xl -z-10 opacity-70 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                 {/* Phone Frame Metallic Edge */}
-                <div className="bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 rounded-[3rem] p-1.5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-600 relative">
+                <div className="bg-linear-to-b from-slate-700 via-slate-800 to-slate-900 rounded-[3rem] p-1.5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-600 relative">
                   {/* Side Buttons */}
                   <div className="absolute top-32 -left-1.5 w-1.5 h-12 bg-slate-700 rounded-l-md shadow-inner"></div>
                   <div className="absolute top-48 -left-1.5 w-1.5 h-12 bg-slate-700 rounded-l-md shadow-inner"></div>
@@ -204,7 +204,7 @@ export default function CanalDifusion() {
                       </span>
                       <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#008069] font-bold text-xl relative shrink-0 shadow-sm">
                         <span className="material-symbols-outlined">work</span>
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-[2px] border-[#008069] rounded-full"></div>
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-[#008069] rounded-full"></div>
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <h5 className="font-bold text-base leading-tight truncate">
@@ -228,7 +228,7 @@ export default function CanalDifusion() {
                       {/* Message 1 */}
                       <div className="bg-white p-3 rounded-2xl rounded-tl-sm shadow-[0_1px_2px_rgba(0,0,0,0.1)] w-[92%] relative">
                         {/* Tail */}
-                        <div className="absolute top-0 -left-2 w-0 h-0 border-t-[0px] border-t-transparent border-r-[12px] border-r-white border-b-[16px] border-b-transparent drop-shadow-sm"></div>
+                        <div className="absolute top-0 -left-2 w-0 h-0 border-t-0 border-t-transparent border-r-12 border-r-white border-b-16 border-b-transparent drop-shadow-sm"></div>
 
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <span className="material-symbols-outlined text-[#008069] text-[15px]">
@@ -263,7 +263,7 @@ export default function CanalDifusion() {
                       {/* Message 2 */}
                       <div className="bg-white p-3 rounded-2xl rounded-tl-sm shadow-[0_1px_2px_rgba(0,0,0,0.1)] w-[92%] relative opacity-0 animate-[fadeInUp_0.8s_ease-out_0.8s_forwards]">
                         {/* Tail */}
-                        <div className="absolute top-0 -left-2 w-0 h-0 border-t-[0px] border-t-transparent border-r-[12px] border-r-white border-b-[16px] border-b-transparent drop-shadow-sm"></div>
+                        <div className="absolute top-0 -left-2 w-0 h-0 border-t-0 border-t-transparent border-r-12 border-r-white border-b-16 border-b-transparent drop-shadow-sm"></div>
 
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <span className="material-symbols-outlined text-[#008069] text-[15px]">
