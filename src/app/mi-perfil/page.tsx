@@ -80,6 +80,47 @@ export default function MiPerfil() {
   // CV Upload State
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingCv, setUploadingCv] = useState(false);
+
+  // Password Change State
+  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+  };
+
+  const submitChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError("Las nuevas contraseñas no coinciden.");
+      return;
+    }
+    setPasswordSaving(true);
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPasswordSuccess("¡Contraseña actualizada exitosamente!");
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        setPasswordError(data.error || "No se pudo cambiar la contraseña.");
+      }
+    } catch (err) {
+      setPasswordError("Error de red al conectar.");
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
   const [showJobEditModal, setShowJobEditModal] = useState(false);
   const [jobEditData, setJobEditData] = useState<EditableJobForm>(emptyJobForm);
   const [jobEditSaving, setJobEditSaving] = useState(false);
@@ -377,7 +418,7 @@ export default function MiPerfil() {
                        </button>
                     </>
                  )}
-                 <button className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-slate-400 hover:bg-slate-800 hover:text-white flex items-center gap-3">
+                 <button onClick={() => setActiveTab('cambiar_contrasena')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'cambiar_contrasena' ? (profile.user?.tipo_cuenta === 'candidato' ? 'bg-primary/10 text-primary' : 'bg-[#3b5acc]/20 text-[#5b83e8]') : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
                     <span className="material-symbols-outlined text-[20px]">lock</span> Cambiar Contraseña
                  </button>
                  <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold text-red-500/80 hover:bg-red-500/10 hover:text-red-400 flex items-center gap-3">
@@ -615,6 +656,55 @@ export default function MiPerfil() {
              <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500">
                 <span className="material-symbols-outlined text-4xl mb-4">search</span>
                 <p>Módulo de búsqueda de candidatos en desarrollo...</p>
+             </div>
+          )}
+
+          {/* TAB: CAMBIAR CONTRASEÑA */}
+          {activeTab === 'cambiar_contrasena' && (
+             <div className="max-w-md mx-auto pt-2 md:pt-6">
+                <div className="mb-6 text-center">
+                   <h1 className="text-2xl font-extrabold text-white">Cambiar Contraseña</h1>
+                   <p className="text-slate-400 mt-2 text-xs font-medium">Usa tu contraseña actual para verificar y actualizarla.</p>
+                </div>
+                
+                <div className="bg-surface-dark border border-slate-800 p-6 rounded-xl shadow-xl">
+                    <form onSubmit={submitChangePassword} className="space-y-4">
+                        {passwordError && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm text-center font-bold px-2">{passwordError}</div>}
+                        {passwordSuccess && <div className="bg-green-500/10 border border-green-500/20 text-green-500 p-3 rounded-lg text-sm text-center font-bold px-2">{passwordSuccess}</div>}
+                        
+                        <div>
+                            <label className="block text-xs text-slate-400 mb-1 font-medium">Contraseña Actual *</label>
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">key</span>
+                                <input required type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className="w-full bg-background-dark border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600 text-sm" placeholder="Escribe tu contraseña actual" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs text-slate-400 mb-1 font-medium">Nueva Contraseña *</label>
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">lock_reset</span>
+                                <input minLength={6} required type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className="w-full bg-background-dark border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600 text-sm" placeholder="Mínimo 6 caracteres" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs text-slate-400 mb-1 font-medium">Repetir Nueva Contraseña *</label>
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">lock</span>
+                                <input minLength={6} required type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className="w-full bg-background-dark border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600 text-sm" placeholder="Repite la nueva contraseña" />
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={passwordSaving}
+                            className={`w-full mt-4 ${profile.user?.tipo_cuenta === 'candidato' ? 'bg-primary hover:bg-primary/90 shadow-[0_0_15px_rgba(19,200,236,0.3)]' : 'bg-[#5b83e8] hover:bg-[#4a6dc6] shadow-[0_0_15px_rgba(91,131,232,0.4)]'} text-background-dark font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm ${passwordSaving ? 'opacity-75 cursor-not-allowed' : ''}`}
+                        >
+                            {passwordSaving ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span> : 'Guardar Nueva Contraseña'}
+                        </button>
+                    </form>
+                </div>
              </div>
           )}
 
