@@ -4,6 +4,67 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+type EditableJobForm = {
+  jobId: number | null;
+  empresa: string;
+  posicion: string;
+  requisitos: string;
+  areas: string;
+  disponibilidad: string;
+  contacto: string;
+  pais: string;
+  provincia: string;
+  areas_interes: string;
+  zona: string;
+  direccion: string;
+  visible_suscripcion: boolean;
+  requiere_salario: boolean;
+};
+
+type JobNotice = {
+  tone: "success" | "warning" | "error";
+  message: string;
+};
+
+const emptyJobForm: EditableJobForm = {
+  jobId: null,
+  empresa: "",
+  posicion: "",
+  requisitos: "",
+  areas: "",
+  disponibilidad: "",
+  contacto: "",
+  pais: "",
+  provincia: "",
+  areas_interes: "",
+  zona: "",
+  direccion: "",
+  visible_suscripcion: false,
+  requiere_salario: false,
+};
+
+function getJobApprovalMeta(status: string) {
+  if (status === "pending") {
+    return {
+      badgeClass: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+      bannerClass: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+      icon: "hourglass_top",
+      label: "En aprobacion",
+      description:
+        "Esta oferta todavia no es visible publicamente. Cuando el administrador la apruebe se publicara normalmente.",
+    };
+  }
+
+  return {
+    badgeClass: "bg-green-500/10 text-green-500 border-green-500/20",
+    bannerClass: "bg-green-500/10 text-green-400 border-green-500/20",
+    icon: "verified",
+    label: "Aprobado",
+    description:
+      "Esta oferta ya fue aprobada y se muestra normalmente a los candidatos.",
+  };
+}
+
 export default function MiPerfil() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
@@ -19,6 +80,11 @@ export default function MiPerfil() {
   // CV Upload State
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingCv, setUploadingCv] = useState(false);
+  const [showJobEditModal, setShowJobEditModal] = useState(false);
+  const [jobEditData, setJobEditData] = useState<EditableJobForm>(emptyJobForm);
+  const [jobEditSaving, setJobEditSaving] = useState(false);
+  const [jobEditError, setJobEditError] = useState("");
+  const [jobNotice, setJobNotice] = useState<JobNotice | null>(null);
 
   const fetchProfile = async () => {
     try {
@@ -60,8 +126,42 @@ export default function MiPerfil() {
     window.location.href = "/";
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const openJobEditModal = (job: any) => {
+    setJobNotice(null);
+    setJobEditError("");
+    setJobEditData({
+      jobId: job.id,
+      empresa: job.empresa || "",
+      posicion: job.posicion || "",
+      requisitos: job.requisitos || "",
+      areas: job.areas || "",
+      disponibilidad: job.disponibilidad || "",
+      contacto: job.contacto || "",
+      pais: job.pais || "",
+      provincia: job.provincia || "",
+      areas_interes: job.areas_interes || "",
+      zona: job.zona || "",
+      direccion: job.direccion || "",
+      visible_suscripcion: Boolean(job.visible_suscripcion),
+      requiere_salario: Boolean(job.requiere_salario),
+    });
+    setShowJobEditModal(true);
+  };
+
+  const handleJobEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setJobEditData({ ...jobEditData, [e.target.name]: e.target.value });
+  };
+
+  const handleJobToggle = (name: "visible_suscripcion" | "requiere_salario") => {
+    setJobEditData((current) => ({ ...current, [name]: !current[name] }));
   };
 
   const submitEditProfile = async (e: React.FormEvent) => {
@@ -84,6 +184,45 @@ export default function MiPerfil() {
       console.error(err);
     } finally {
       setEditSaving(false);
+    }
+  };
+
+  const submitJobEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setJobEditSaving(true);
+    setJobEditError("");
+
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/postulaciones", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(jobEditData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setShowJobEditModal(false);
+        setJobEditData(emptyJobForm);
+        setJobNotice({
+          tone: "warning",
+          message:
+            data.message ||
+            "La oferta laboral fue actualizada y quedo nuevamente en aprobacion.",
+        });
+        fetchProfile();
+      } else {
+        setJobEditError(data.error || "No se pudo actualizar la oferta.");
+      }
+    } catch (err) {
+      console.error(err);
+      setJobEditError("Hubo un problema de conexion al guardar la oferta.");
+    } finally {
+      setJobEditSaving(false);
     }
   };
 
@@ -201,7 +340,7 @@ export default function MiPerfil() {
               
               {profile.user?.descripcion && (
                  <div className="mb-4 text-xs text-slate-400 border-l-2 border-slate-700 pl-3">
-                    <p className="line-clamp-3 italic">"{profile.user.descripcion}"</p>
+                    <p className="line-clamp-3 italic">&ldquo;{profile.user.descripcion}&rdquo;</p>
                  </div>
               )}
               
@@ -306,7 +445,7 @@ export default function MiPerfil() {
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>
                             {app.status}
                          </div>
-                      </div>
+                       </div>
                     ))}
                   </div>
                 )}
@@ -325,9 +464,33 @@ export default function MiPerfil() {
                      <button onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold py-3 px-6 rounded-xl transition-all border border-red-500/20 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px]">logout</span>
                         Cerrar sesión
-                     </button>
+                 </button>
                    </div>
                 </div>
+
+                {jobNotice && (
+                  <div
+                    className={`mb-6 rounded-2xl border p-5 ${
+                      jobNotice.tone === "error"
+                        ? "bg-red-500/10 border-red-500/20 text-red-400"
+                        : jobNotice.tone === "warning"
+                          ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                          : "bg-green-500/10 border-green-500/20 text-green-400"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-bold">
+                      <span className="material-symbols-outlined text-[18px]">
+                        {jobNotice.tone === "error"
+                          ? "error"
+                          : jobNotice.tone === "warning"
+                            ? "hourglass_top"
+                            : "check_circle"}
+                      </span>
+                      Estado de la oferta
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed">{jobNotice.message}</p>
+                  </div>
+                )}
 
                 {profile.companyJobs?.length === 0 ? (
                   <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500">
@@ -338,32 +501,47 @@ export default function MiPerfil() {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {profile.companyJobs.map((job: any) => (
-                      <div key={job.id} className="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-                         <div className="p-6 border-b border-slate-800 flex justify-between items-start">
+                    {profile.companyJobs.map((job: any) => {
+                      const approvalMeta = getJobApprovalMeta(job.approval_status);
+
+                      return (
+                        <div key={job.id} className="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                          <div className="p-6 border-b border-slate-800 flex flex-col md:flex-row justify-between items-start gap-4">
                             <div>
-                               <h3 className="text-xl font-bold text-white mb-2">{job.posicion}</h3>
-                               <div className="flex gap-4 text-xs text-slate-400">
-                                  <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span> {job.provincia}, {job.pais}</span>
-                                  <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">calendar_today</span> 
-                                    {new Date(job.created_at).toLocaleDateString()}
-                                  </span>
-                               </div>
+                              <h3 className="text-xl font-bold text-white mb-2">{job.posicion}</h3>
+                              <div className="flex flex-wrap gap-4 text-xs text-slate-400">
+                                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span> {job.provincia}, {job.pais}</span>
+                                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">calendar_today</span> {new Date(job.created_at).toLocaleDateString()}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                               <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                                 job.approval_status === "pending"
-                                   ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                   : "bg-green-500/10 text-green-500 border-green-500/20"
-                               }`}>
-                                  {job.approval_status === "pending" ? "Pendiente" : "Aprobado"}
-                               </div>
-                               <div className="bg-[#3b5acc]/20 text-[#5b83e8] px-3 py-1 rounded-full text-xs font-bold border border-[#5b83e8]/30">
+                            <div className="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
+                              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                                <div className={`px-3 py-1 rounded-full text-xs font-bold border ${approvalMeta.badgeClass}`}>
+                                  {approvalMeta.label}
+                                </div>
+                                <div className="bg-[#3b5acc]/20 text-[#5b83e8] px-3 py-1 rounded-full text-xs font-bold border border-[#5b83e8]/30">
                                   {job.applications?.length || 0} Postulantes
-                               </div>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => openJobEditModal(job)}
+                                className="inline-flex items-center gap-2 border border-slate-700 text-slate-200 hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">edit</span>
+                                Editar oferta
+                              </button>
                             </div>
-                         </div>
-                         <div className="p-0">
+                          </div>
+
+                          <div className={`mx-6 mt-6 rounded-2xl border px-4 py-4 ${approvalMeta.bannerClass}`}>
+                            <div className="flex items-center gap-2 font-bold">
+                              <span className="material-symbols-outlined text-[18px]">{approvalMeta.icon}</span>
+                              {approvalMeta.label}
+                            </div>
+                            <p className="mt-2 text-sm leading-relaxed">{approvalMeta.description}</p>
+                          </div>
+
+                          <div className="p-0">
                             {job.applications?.length === 0 ? (
                                <div className="p-6 text-sm text-slate-500 text-center">Nadie se ha postulado a esta posición aún.</div>
                             ) : (
@@ -423,8 +601,9 @@ export default function MiPerfil() {
                                </div>
                             )}
                          </div>
-                      </div>
-                    ))}
+                       </div>
+                      );
+                    })}
                   </div>
                 )}
              </div>
@@ -441,6 +620,129 @@ export default function MiPerfil() {
 
         </div>
       </div>
+
+      {showJobEditModal && (
+         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm"
+              onClick={() => {
+                setShowJobEditModal(false);
+                setJobEditError("");
+              }}
+            ></div>
+            <div className="relative bg-surface-dark rounded-2xl border border-slate-800 shadow-2xl p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto z-10 custom-scrollbar">
+               <button
+                 onClick={() => {
+                   setShowJobEditModal(false);
+                   setJobEditError("");
+                 }}
+                 className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/50 p-1 rounded-full"
+               >
+                  <span className="material-symbols-outlined">close</span>
+               </button>
+
+               <h3 className="text-2xl font-bold text-white mb-2">Editar oferta laboral</h3>
+               <p className="text-sm text-slate-400 mb-6">
+                  Al guardar, la oferta vuelve a estado de aprobacion hasta que el administrador la revise otra vez.
+               </p>
+
+               {jobEditError && (
+                 <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+                   {jobEditError}
+                 </div>
+               )}
+
+               <form onSubmit={submitJobEdit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="md:col-span-2">
+                        <label className="block text-sm text-slate-400 mb-1">Empresa</label>
+                        <input required type="text" name="empresa" value={jobEditData.empresa} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div className="md:col-span-2">
+                        <label className="block text-sm text-slate-400 mb-1">Posicion</label>
+                        <input required type="text" name="posicion" value={jobEditData.posicion} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div className="md:col-span-2">
+                        <label className="block text-sm text-slate-400 mb-1">Requisitos</label>
+                        <textarea name="requisitos" rows={4} value={jobEditData.requisitos} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none resize-none"></textarea>
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-400 mb-1">Areas</label>
+                        <input required type="text" name="areas" value={jobEditData.areas} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-400 mb-1">Disponibilidad</label>
+                        <input required type="text" name="disponibilidad" value={jobEditData.disponibilidad} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div className="md:col-span-2">
+                        <label className="block text-sm text-slate-400 mb-1">Contacto</label>
+                        <input required type="text" name="contacto" value={jobEditData.contacto} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-400 mb-1">Pais</label>
+                        <input required type="text" name="pais" value={jobEditData.pais} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-400 mb-1">Provincia</label>
+                        <input required type="text" name="provincia" value={jobEditData.provincia} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-400 mb-1">Areas de interes</label>
+                        <input required type="text" name="areas_interes" value={jobEditData.areas_interes} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div>
+                        <label className="block text-sm text-slate-400 mb-1">Zona</label>
+                        <input required type="text" name="zona" value={jobEditData.zona} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                     <div className="md:col-span-2">
+                        <label className="block text-sm text-slate-400 mb-1">Direccion</label>
+                        <input required type="text" name="direccion" value={jobEditData.direccion} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" />
+                     </div>
+                  </div>
+
+                  <div className="space-y-4 border border-slate-800 rounded-2xl p-4">
+                     <label className="flex items-center justify-between gap-4 cursor-pointer">
+                        <div>
+                           <p className="text-sm font-bold text-white">Visible para usuarios con subscripcion</p>
+                           <p className="text-xs text-slate-500">Mantiene la misma configuracion de visibilidad.</p>
+                        </div>
+                        <div
+                          onClick={() => handleJobToggle("visible_suscripcion")}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${jobEditData.visible_suscripcion ? "bg-[#5b83e8]" : "bg-slate-600"}`}
+                        >
+                          <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${jobEditData.visible_suscripcion ? "translate-x-6" : "translate-x-0"}`}></div>
+                        </div>
+                     </label>
+                     <label className="flex items-center justify-between gap-4 cursor-pointer">
+                        <div>
+                           <p className="text-sm font-bold text-white">Requiere salario pretendido</p>
+                           <p className="text-xs text-slate-500">Define si el candidato debe informar remuneracion.</p>
+                        </div>
+                        <div
+                          onClick={() => handleJobToggle("requiere_salario")}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${jobEditData.requiere_salario ? "bg-[#5b83e8]" : "bg-slate-600"}`}
+                        >
+                          <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${jobEditData.requiere_salario ? "translate-x-6" : "translate-x-0"}`}></div>
+                        </div>
+                     </label>
+                  </div>
+
+                  <div className="sticky bottom-0 bg-surface-dark pt-4 border-t border-slate-800 flex justify-end gap-3 mt-6">
+                     <button type="button" onClick={() => setShowJobEditModal(false)} className="px-6 py-3 font-bold text-slate-300 hover:text-white transition-colors">
+                        Cancelar
+                     </button>
+                     <button type="submit" disabled={jobEditSaving} className="bg-[#5b83e8] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#4a6dc6] transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(91,131,232,0.3)]">
+                        {jobEditSaving ? (
+                          <><span className="material-symbols-outlined animate-spin text-[20px]">sync</span> Guardando</>
+                        ) : (
+                          <><span className="material-symbols-outlined text-[20px]">save</span> Guardar oferta</>
+                        )}
+                     </button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      )}
 
       {/* Edit Profile Modal */}
       {showEditModal && (

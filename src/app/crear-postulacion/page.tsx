@@ -3,30 +3,32 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const emptyFormData = {
+  empresa: "",
+  posicion: "",
+  requisitos: "",
+  areas: "",
+  disponibilidad: "",
+  contacto: "",
+  pais: "",
+  provincia: "",
+  areas_interes: "",
+  zona: "",
+  direccion: "",
+  visible_suscripcion: false,
+  requiere_salario: false,
+};
+
 export default function CrearPostulacion() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMessage, setSuccessMessage] = useState(
-    "La busqueda de empleo fue guardada y quedo pendiente de aprobacion del administrador."
+    "La oferta laboral fue guardada y ya aparece en tu panel como En aprobacion."
   );
 
-  const [formData, setFormData] = useState({
-    empresa: "",
-    posicion: "",
-    requisitos: "",
-    areas: "",
-    disponibilidad: "",
-    contacto: "",
-    pais: "",
-    provincia: "",
-    areas_interes: "",
-    zona: "",
-    direccion: "",
-    visible_suscripcion: false,
-    requiere_salario: false,
-  });
+  const [formData, setFormData] = useState(emptyFormData);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -59,8 +61,8 @@ export default function CrearPostulacion() {
       if (response.ok) {
         setSuccessMessage(
           data.approvalStatus === "pending"
-            ? "La busqueda de empleo fue guardada y quedo pendiente de aprobacion del administrador."
-            : "La busqueda de empleo fue guardada con exito."
+            ? "La oferta laboral fue guardada y ya aparece en tu panel como En aprobacion."
+            : "La oferta laboral fue guardada con exito."
         );
         setSuccess(true);
       } else {
@@ -81,36 +83,22 @@ export default function CrearPostulacion() {
           <span className="material-symbols-outlined text-6xl text-primary mb-4 block">
             check_circle
           </span>
-          <h2 className="text-3xl font-bold text-white mb-2">Postulacion creada</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Oferta laboral creada</h2>
           <p className="text-slate-400 mb-8">{successMessage}</p>
+          <button
+            onClick={() => router.push("/mi-perfil")}
+            className="w-full py-3 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-all mb-4"
+          >
+            Ver mis ofertas
+          </button>
           <button
             onClick={() => {
               setSuccess(false);
-              setFormData({
-                empresa: "",
-                posicion: "",
-                requisitos: "",
-                areas: "",
-                disponibilidad: "",
-                contacto: "",
-                pais: "",
-                provincia: "",
-                areas_interes: "",
-                zona: "",
-                direccion: "",
-                visible_suscripcion: false,
-                requiere_salario: false,
-              });
+              setFormData(emptyFormData);
             }}
-            className="w-full py-3 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-all mb-4"
-          >
-            Crear otra postulacion
-          </button>
-          <button
-            onClick={() => router.push("/")}
             className="w-full py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-all"
           >
-            Volver al Inicio
+            Crear otra oferta
           </button>
         </div>
       </div>
@@ -123,11 +111,11 @@ export default function CrearPostulacion() {
         <div className="flex justify-center items-center gap-4 mb-4">
           <div className="w-8 h-8 rounded-full bg-[#5b83e8] shrink-0"></div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#5b83e8]">
-            Crear postulacion
+            Crear oferta laboral
           </h1>
         </div>
         <p className="text-slate-400 text-center mb-8">
-          Llena los datos requeridos para la busqueda de empleados
+          Llena los datos requeridos para publicar una oferta laboral
         </p>
 
         {errorMsg && (
