@@ -400,7 +400,13 @@ export default function MiPerfil() {
                     <>
                        <button onClick={() => setActiveTab('inicio')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'inicio' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
                           <span className="material-symbols-outlined text-[20px]">person</span> Inicio
-                       </button>
+                        </button>
+                        <button onClick={() => setActiveTab('notificaciones')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'notificaciones' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                           <span className="material-symbols-outlined text-[20px]">notifications</span> Notificaciones
+                        </button>
+                        <button onClick={() => setActiveTab('suscripcion')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'suscripcion' ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                           <span className="material-symbols-outlined text-[20px]">card_membership</span> Suscripción
+                        </button>
                        <a href={wpUrl} target="_blank" rel="noopener noreferrer" className="w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 text-slate-400 hover:bg-slate-800 hover:text-white">
                           <span className="material-symbols-outlined text-[20px]">support_agent</span> Asistencia
                        </a>
@@ -415,7 +421,10 @@ export default function MiPerfil() {
                        </a>
                        <button onClick={() => setActiveTab('buscar_candidatos')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'buscar_candidatos' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
                           <span className="material-symbols-outlined text-[20px]">search</span> Buscar Candidatos
-                       </button>
+                        </button>
+                        <button onClick={() => setActiveTab('notificaciones')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'notificaciones' ? 'bg-[#3b5acc]/20 text-[#5b83e8]' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+                           <span className="material-symbols-outlined text-[20px]">notifications</span> Notificaciones
+                        </button>
                     </>
                  )}
                  <button onClick={() => setActiveTab('cambiar_contrasena')} className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${activeTab === 'cambiar_contrasena' ? (profile.user?.tipo_cuenta === 'candidato' ? 'bg-primary/10 text-primary' : 'bg-[#3b5acc]/20 text-[#5b83e8]') : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
@@ -653,9 +662,25 @@ export default function MiPerfil() {
 
           {/* TAB: EMPRESA - BUSCAR CANDIDATOS */}
           {activeTab === 'buscar_candidatos' && (
-             <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500">
+             <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500 mt-4 md:mt-10">
                 <span className="material-symbols-outlined text-4xl mb-4">search</span>
                 <p>Módulo de búsqueda de candidatos en desarrollo...</p>
+             </div>
+          )}
+
+          {/* TAB: NOTIFICACIONES */}
+          {activeTab === 'notificaciones' && (
+             <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500 mt-4 md:mt-10">
+                <span className="material-symbols-outlined text-4xl mb-4">notifications</span>
+                <p>Módulo de notificaciones en desarrollo...</p>
+             </div>
+          )}
+
+          {/* TAB: SUSCRIPCIÓN */}
+          {activeTab === 'suscripcion' && profile.user?.tipo_cuenta === 'candidato' && (
+             <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500 mt-4 md:mt-10">
+                <span className="material-symbols-outlined text-4xl mb-4">card_membership</span>
+                <p>Módulo de suscripción en desarrollo...</p>
              </div>
           )}
 
