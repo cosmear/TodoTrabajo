@@ -126,7 +126,7 @@ export default function AuthModals() {
 
   return (
     <>
-      <div id="login-modal" className="fixed inset-0 z-[100] hidden">
+      <div id="login-modal" className="fixed inset-0 z-100 hidden">
         <div
           className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm transition-opacity"
           onClick={() =>
@@ -205,6 +205,7 @@ export default function AuthModals() {
                   <Link
                     href="/recuperar"
                     className="text-sm text-primary hover:underline"
+                    onClick={() => document.getElementById("login-modal")?.classList.add("hidden")}
                   >
                     Olvidaste tu contrasena?
                   </Link>
@@ -243,7 +244,7 @@ export default function AuthModals() {
         </div>
       </div>
 
-      <div id="register-modal" className="fixed inset-0 z-[100] hidden">
+      <div id="register-modal" className="fixed inset-0 z-100 hidden">
         <div
           className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm transition-opacity"
           onClick={() =>

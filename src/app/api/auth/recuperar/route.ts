@@ -24,12 +24,11 @@ export async function POST(request: Request) {
 
       // 2. Generate token
       const resetToken = crypto.randomBytes(32).toString('hex');
-      const tokenExpires = new Date(Date.now() + 3600000); // 1 hour
 
       // 3. Save to DB
       await connection.query(
-        `UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?`,
-        [resetToken, tokenExpires, user.id]
+        `UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?`,
+        [resetToken, user.id]
       );
 
       // 4. Send Email

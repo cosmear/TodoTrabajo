@@ -16,21 +16,15 @@ export async function POST(request: Request) {
     try {
       // 1. Find user by token and check expiration
       const [rows]: any = await connection.query(
-        `SELECT id, reset_token_expires FROM users WHERE reset_token = ?`,
+        `SELECT id FROM users WHERE reset_token = ? AND reset_token_expires > NOW()`,
         [token]
       );
 
       if (rows.length === 0) {
-         return NextResponse.json({ success: false, error: 'Token inválido o expirado.' }, { status: 400 });
+         return NextResponse.json({ success: false, error: 'El enlace ha expirado o es inválido. Solicita otro.' }, { status: 400 });
       }
 
       const user = rows[0];
-      const now = new Date();
-      const expires = new Date(user.reset_token_expires);
-
-      if (now > expires) {
-         return NextResponse.json({ success: false, error: 'El enlace ha expirado. Solicita otro.' }, { status: 400 });
-      }
 
       // 2. Hash new password
       const passwordHash = await bcrypt.hash(newPassword, 10);

@@ -73,8 +73,8 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="p-8">
-       <div className="text-center mb-8">
+    <div className="px-8 py-6">
+       <div className="text-center mb-6">
           <div className="w-16 h-16 bg-[#5b83e8]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#5b83e8]">
              <span className="material-symbols-outlined text-3xl">lock_reset</span>
           </div>
@@ -82,7 +82,7 @@ function ResetPasswordForm() {
           <p className="text-slate-400 mt-2 text-sm font-medium">Ingresa tu nueva contraseña para acceder a la plataforma.</p>
        </div>
 
-       <form onSubmit={handleSubmit} className="space-y-6">
+       <form onSubmit={handleSubmit} className="space-y-5">
           {errorMsg && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-lg text-sm text-center font-bold px-2">{errorMsg}</div>}
           
           <div>
@@ -102,7 +102,7 @@ function ResetPasswordForm() {
           <div>
              <label className="block text-sm text-slate-400 mb-2 font-medium">Confirmar Contraseña</label>
              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">lock_check</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">lock</span>
                 <input 
                    type="password" 
                    required
