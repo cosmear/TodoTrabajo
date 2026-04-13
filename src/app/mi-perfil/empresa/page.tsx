@@ -1,0 +1,509 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import EmpresaSidebar from "@/components/sidebars/EmpresaSidebar";
+
+type EditableJobForm = {
+  jobId: number | null;
+  empresa: string;
+  posicion: string;
+  requisitos: string;
+  areas: string;
+  disponibilidad: string;
+  contacto: string;
+  pais: string;
+  provincia: string;
+  areas_interes: string;
+  zona: string;
+  direccion: string;
+  visible_suscripcion: boolean;
+  requiere_salario: boolean;
+};
+
+type JobNotice = { tone: "success" | "warning" | "error"; message: string };
+
+const emptyJobForm: EditableJobForm = {
+  jobId: null, empresa: "", posicion: "", requisitos: "", areas: "",
+  disponibilidad: "", contacto: "", pais: "", provincia: "",
+  areas_interes: "", zona: "", direccion: "",
+  visible_suscripcion: false, requiere_salario: false,
+};
+
+function getJobApprovalMeta(status: string) {
+  if (status === "pending") {
+    return {
+      badgeClass: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+      bannerClass: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+      icon: "hourglass_top", label: "En aprobacion",
+      description: "Esta oferta todavia no es visible publicamente. Cuando el administrador la apruebe se publicara normalmente.",
+    };
+  }
+  return {
+    badgeClass: "bg-green-500/10 text-green-500 border-green-500/20",
+    bannerClass: "bg-green-500/10 text-green-400 border-green-500/20",
+    icon: "verified", label: "Aprobado",
+    description: "Esta oferta ya fue aprobada y se muestra normalmente a los candidatos.",
+  };
+}
+
+export default function MiPerfilEmpresa() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [activeTab, setActiveTab] = useState("empresa");
+
+  // Edit Profile State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState<any>({});
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Password Change State
+  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+
+  // Job Edit State
+  const [showJobEditModal, setShowJobEditModal] = useState(false);
+  const [jobEditData, setJobEditData] = useState<EditableJobForm>(emptyJobForm);
+  const [jobEditSaving, setJobEditSaving] = useState(false);
+  const [jobEditError, setJobEditError] = useState("");
+  const [jobNotice, setJobNotice] = useState<JobNotice | null>(null);
+
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("tt_session");
+      if (!token) { router.push("/"); return; }
+      const res = await fetch("/api/perfil", { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (data.success) {
+        setProfile(data);
+      } else {
+        setErrorMsg(data.error || "Error cargando el perfil.");
+        if (data.status === 401) { localStorage.removeItem("tt_session"); router.push("/"); }
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Problema de red al cargar el perfil.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchProfile(); }, []);
+
+  const handleLogout = () => { localStorage.removeItem("tt_session"); window.location.href = "/"; };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setEditData((prev: any) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const submitEditProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditSaving(true);
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/perfil/edit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editData),
+      });
+      if (res.ok) { setShowEditModal(false); fetchProfile(); }
+      else { alert("Error al guardar perfil"); }
+    } catch (err) { console.error(err); }
+    finally { setEditSaving(false); }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const submitChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError("Las nuevas contraseñas no coinciden."); return;
+    }
+    setPasswordSaving(true); setPasswordError(""); setPasswordSuccess("");
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPasswordSuccess("¡Contraseña actualizada exitosamente!");
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } else { setPasswordError(data.error || "No se pudo cambiar la contraseña."); }
+    } catch { setPasswordError("Error de red al conectar."); }
+    finally { setPasswordSaving(false); }
+  };
+
+  const openJobEditModal = (job: any) => {
+    setJobNotice(null); setJobEditError("");
+    setJobEditData({
+      jobId: job.id, empresa: job.empresa || "", posicion: job.posicion || "",
+      requisitos: job.requisitos || "", areas: job.areas || "",
+      disponibilidad: job.disponibilidad || "", contacto: job.contacto || "",
+      pais: job.pais || "", provincia: job.provincia || "",
+      areas_interes: job.areas_interes || "", zona: job.zona || "",
+      direccion: job.direccion || "",
+      visible_suscripcion: Boolean(job.visible_suscripcion),
+      requiere_salario: Boolean(job.requiere_salario),
+    });
+    setShowJobEditModal(true);
+  };
+
+  const handleJobEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setJobEditData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleJobToggle = (name: "visible_suscripcion" | "requiere_salario") => {
+    setJobEditData((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const submitJobEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setJobEditSaving(true); setJobEditError("");
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/postulaciones", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(jobEditData),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShowJobEditModal(false);
+        setJobEditData(emptyJobForm);
+        setJobNotice({ tone: "warning", message: data.message || "La oferta laboral fue actualizada y quedo nuevamente en aprobacion." });
+        fetchProfile();
+      } else { setJobEditError(data.error || "No se pudo actualizar la oferta."); }
+    } catch { setJobEditError("Hubo un problema de conexion al guardar la oferta."); }
+    finally { setJobEditSaving(false); }
+  };
+
+  const handleStatusChange = async (applicationId: number, currentStatus: string, newStatus: string) => {
+    if (currentStatus === newStatus) return;
+    try {
+      const token = localStorage.getItem("tt_session");
+      const res = await fetch("/api/postulaciones/estado", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ applicationId, newStatus }),
+      });
+      if (res.ok) { fetchProfile(); }
+      else { alert("Error al actualizar estado."); }
+    } catch (err) { console.error(err); }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f1618] flex items-center justify-center pt-20">
+        <div className="text-center text-slate-400">
+          <span className="material-symbols-outlined animate-spin text-5xl text-primary mb-4 block">sync</span>
+          <p className="font-medium text-lg">Cargando tu perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="min-h-screen bg-[#0f1618] flex items-center justify-center pt-20">
+        <div className="bg-surface-dark border border-slate-800 p-8 rounded-2xl text-center max-w-md w-full">
+          <span className="material-symbols-outlined text-red-500 text-5xl mb-4">error</span>
+          <h2 className="text-2xl text-white font-bold mb-2">Ups, algo falló</h2>
+          <p className="text-slate-400 mb-6">{errorMsg}</p>
+          <button onClick={() => router.push("/")} className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:bg-primary/90">Volver al Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  const wpMessage = `Hola, acabo de presionar el botón de asistencia en la web-app de todo trabajo. mi nombre es: "${profile?.user?.nombre_completo || ''}", tengo perfil de: "empresa" y quiero asistencia con: `;
+  const wpUrl = `https://wa.me/5491166554414?text=${encodeURIComponent(wpMessage)}`;
+
+  return (
+    <div className="min-h-screen bg-linear-to-b from-background-dark to-[#0f1618] pt-10 pb-20">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 px-4">
+
+        <EmpresaSidebar
+          user={profile.user}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onEditProfile={() => { setEditData({ ...profile.user }); setShowEditModal(true); }}
+          onLogout={handleLogout}
+          wpUrl={wpUrl}
+        />
+
+        <div className="flex-1">
+
+          {/* TAB: DASHBOARD EMPRESA */}
+          {activeTab === "empresa" && (
+            <div>
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                <h1 className="text-3xl font-extrabold text-white">Dashboard de tu Empresa</h1>
+                <div className="flex items-center gap-3">
+                  <Link href="/crear-postulacion" className="bg-[#5b83e8] hover:bg-[#4a6dc6] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(91,131,232,0.4)] flex items-center gap-2">
+                    <span className="material-symbols-outlined">add_circle</span> CREAR EMPLEO
+                  </Link>
+                  <button onClick={handleLogout} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold py-3 px-6 rounded-xl transition-all border border-red-500/20 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">logout</span> Cerrar sesión
+                  </button>
+                </div>
+              </div>
+
+              {jobNotice && (
+                <div className={`mb-6 rounded-2xl border p-5 ${jobNotice.tone === "error" ? "bg-red-500/10 border-red-500/20 text-red-400" : jobNotice.tone === "warning" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-green-500/10 border-green-500/20 text-green-400"}`}>
+                  <div className="flex items-center gap-2 font-bold">
+                    <span className="material-symbols-outlined text-[18px]">{jobNotice.tone === "error" ? "error" : jobNotice.tone === "warning" ? "hourglass_top" : "check_circle"}</span>
+                    Estado de la oferta
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed">{jobNotice.message}</p>
+                </div>
+              )}
+
+              {profile.companyJobs?.length === 0 ? (
+                <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500">
+                  Aún no tienes publicaciones activas.<br /><br />
+                  <Link href="/crear-postulacion" className="inline-block bg-[#5b83e8]/10 text-[#5b83e8] hover:bg-[#5b83e8]/20 font-bold py-2.5 px-6 rounded-lg transition-all mt-2">
+                    Publicar tu primera búsqueda
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {profile.companyJobs.map((job: any) => {
+                    const approvalMeta = getJobApprovalMeta(job.approval_status);
+                    return (
+                      <div key={job.id} className="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                        <div className="p-6 border-b border-slate-800 flex flex-col md:flex-row justify-between items-start gap-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-white mb-2">{job.posicion}</h3>
+                            <div className="flex flex-wrap gap-4 text-xs text-slate-400">
+                              <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span> {job.provincia}, {job.pais}</span>
+                              <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">calendar_today</span> {new Date(job.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
+                            <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                              <div className={`px-3 py-1 rounded-full text-xs font-bold border ${approvalMeta.badgeClass}`}>{approvalMeta.label}</div>
+                              <div className="bg-[#3b5acc]/20 text-[#5b83e8] px-3 py-1 rounded-full text-xs font-bold border border-[#5b83e8]/30">{job.applications?.length || 0} Postulantes</div>
+                            </div>
+                            <button onClick={() => openJobEditModal(job)} className="inline-flex items-center gap-2 border border-slate-700 text-slate-200 hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold transition-all">
+                              <span className="material-symbols-outlined text-[18px]">edit</span> Editar oferta
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className={`mx-6 mt-6 rounded-2xl border px-4 py-4 ${approvalMeta.bannerClass}`}>
+                          <div className="flex items-center gap-2 font-bold">
+                            <span className="material-symbols-outlined text-[18px]">{approvalMeta.icon}</span>
+                            {approvalMeta.label}
+                          </div>
+                          <p className="mt-2 text-sm leading-relaxed">{approvalMeta.description}</p>
+                        </div>
+
+                        <div className="p-0">
+                          {job.applications?.length === 0 ? (
+                            <div className="p-6 text-sm text-slate-500 text-center">Nadie se ha postulado a esta posición aún.</div>
+                          ) : (
+                            <div className="divide-y divide-slate-800/50">
+                              {job.applications.map((app: any) => (
+                                <div key={app.application_id} className="p-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/20 transition-colors">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-slate-700 shrink-0 rounded-full flex items-center justify-center text-white font-bold">
+                                      {app.nombre_completo.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <p className="font-bold text-slate-200 text-sm">{app.nombre_completo}</p>
+                                      <p className="text-slate-500 text-xs mb-1">{app.email}</p>
+                                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                                        <a href={`mailto:${app.email}`} className="bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 transition-colors">
+                                          <span className="material-symbols-outlined text-[14px]">mail</span> Email
+                                        </a>
+                                        {app.telefono && (
+                                          <a href={`https://wa.me/${app.telefono.replace(/\D/g, "")}?text=Hola ${app.nombre_completo}, te contactamos por tu postulacion a ${job.posicion} en TodoTrabajo.`} target="_blank" rel="noreferrer" className="bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/20 text-[#25D366] text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 transition-colors">
+                                            <span className="material-symbols-outlined text-[14px]">chat</span> WhatsApp
+                                          </a>
+                                        )}
+                                        {app.cv_url && (
+                                          <a href={app.cv_url} target="_blank" rel="noreferrer" className="bg-[#5b83e8]/10 hover:bg-[#5b83e8]/20 border border-[#5b83e8]/20 text-[#5b83e8] text-[11px] font-bold px-3 py-1.5 rounded flex items-center gap-1 transition-colors">
+                                            <span className="material-symbols-outlined text-[14px]">description</span> CV
+                                          </a>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
+                                    <span className="text-xs text-slate-500">{new Date(app.created_at).toLocaleDateString()}</span>
+                                    <select
+                                      value={app.status || "Enviada"}
+                                      onChange={(e) => handleStatusChange(app.application_id, app.status, e.target.value)}
+                                      className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider appearance-none cursor-pointer outline-none ${app.status === "Contratado" ? "bg-green-500/20 text-green-500 border border-green-500/30" : app.status === "Rechazado" ? "bg-red-500/20 text-red-500 border border-red-500/30" : app.status === "En Entrevista" ? "bg-[#5b83e8]/20 text-[#5b83e8] border border-[#5b83e8]/30" : "bg-slate-800 text-slate-300 border border-slate-700"}`}
+                                    >
+                                      <option value="Enviada" className="bg-surface-dark text-slate-300">Enviada</option>
+                                      <option value="En Entrevista" className="bg-surface-dark text-[#5b83e8]">En Entrevista</option>
+                                      <option value="Contratado" className="bg-surface-dark text-green-500">Contratado</option>
+                                      <option value="Rechazado" className="bg-surface-dark text-red-500">Rechazado</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: BUSCAR CANDIDATOS */}
+          {activeTab === "buscar_candidatos" && (
+            <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500 mt-4 md:mt-10">
+              <span className="material-symbols-outlined text-4xl mb-4">search</span>
+              <p>Módulo de búsqueda de candidatos en desarrollo...</p>
+            </div>
+          )}
+
+          {/* TAB: NOTIFICACIONES */}
+          {activeTab === "notificaciones" && (
+            <div className="bg-surface-dark border border-slate-800 p-10 rounded-2xl text-center text-slate-500 mt-4 md:mt-10">
+              <span className="material-symbols-outlined text-4xl mb-4">notifications</span>
+              <p>Módulo de notificaciones en desarrollo...</p>
+            </div>
+          )}
+
+          {/* TAB: CAMBIAR CONTRASEÑA */}
+          {activeTab === "cambiar_contrasena" && (
+            <div className="max-w-md mx-auto pt-2 md:pt-6">
+              <div className="mb-6 text-center">
+                <h1 className="text-2xl font-extrabold text-white">Cambiar Contraseña</h1>
+                <p className="text-slate-400 mt-2 text-xs font-medium">Usa tu contraseña actual para verificar y actualizarla.</p>
+              </div>
+              <div className="bg-surface-dark border border-slate-800 p-6 rounded-xl shadow-xl">
+                <form onSubmit={submitChangePassword} className="space-y-4">
+                  {passwordError && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm text-center font-bold">{passwordError}</div>}
+                  {passwordSuccess && <div className="bg-green-500/10 border border-green-500/20 text-green-500 p-3 rounded-lg text-sm text-center font-bold">{passwordSuccess}</div>}
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1 font-medium">Contraseña Actual *</label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">key</span>
+                      <input required type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className="w-full bg-background-dark border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-[#5b83e8] focus:ring-1 focus:ring-[#5b83e8] outline-none transition-all placeholder:text-slate-600 text-sm" placeholder="Escribe tu contraseña actual" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1 font-medium">Nueva Contraseña *</label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">lock_reset</span>
+                      <input minLength={6} required type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className="w-full bg-background-dark border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-[#5b83e8] focus:ring-1 focus:ring-[#5b83e8] outline-none transition-all placeholder:text-slate-600 text-sm" placeholder="Mínimo 6 caracteres" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1 font-medium">Repetir Nueva Contraseña *</label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]">lock</span>
+                      <input minLength={6} required type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className="w-full bg-background-dark border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white focus:border-[#5b83e8] focus:ring-1 focus:ring-[#5b83e8] outline-none transition-all placeholder:text-slate-600 text-sm" placeholder="Repite la nueva contraseña" />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={passwordSaving} className={`w-full mt-4 bg-[#5b83e8] hover:bg-[#4a6dc6] shadow-[0_0_15px_rgba(91,131,232,0.4)] text-white font-black py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm ${passwordSaving ? "opacity-75 cursor-not-allowed" : ""}`}>
+                    {passwordSaving ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span> : "Guardar Nueva Contraseña"}
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {/* Job Edit Modal */}
+      {showJobEditModal && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm" onClick={() => { setShowJobEditModal(false); setJobEditError(""); }}></div>
+          <div className="relative bg-surface-dark rounded-2xl border border-slate-800 shadow-2xl p-6 md:p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto z-10 custom-scrollbar">
+            <button onClick={() => { setShowJobEditModal(false); setJobEditError(""); }} className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/50 p-1 rounded-full">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <h3 className="text-2xl font-bold text-white mb-2">Editar oferta laboral</h3>
+            <p className="text-sm text-slate-400 mb-6">Al guardar, la oferta vuelve a estado de aprobacion hasta que el administrador la revise otra vez.</p>
+            {jobEditError && <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">{jobEditError}</div>}
+            <form onSubmit={submitJobEdit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Empresa</label><input required type="text" name="empresa" value={jobEditData.empresa} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Posicion</label><input required type="text" name="posicion" value={jobEditData.posicion} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Requisitos</label><textarea name="requisitos" rows={4} value={jobEditData.requisitos} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none resize-none"></textarea></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Areas</label><input required type="text" name="areas" value={jobEditData.areas} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Disponibilidad</label><input required type="text" name="disponibilidad" value={jobEditData.disponibilidad} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Contacto</label><input required type="text" name="contacto" value={jobEditData.contacto} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Pais</label><input required type="text" name="pais" value={jobEditData.pais} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Provincia</label><input required type="text" name="provincia" value={jobEditData.provincia} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Areas de interes</label><input required type="text" name="areas_interes" value={jobEditData.areas_interes} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Zona</label><input required type="text" name="zona" value={jobEditData.zona} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Direccion</label><input required type="text" name="direccion" value={jobEditData.direccion} onChange={handleJobEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+              </div>
+              <div className="space-y-4 border border-slate-800 rounded-2xl p-4">
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <div><p className="text-sm font-bold text-white">Visible para usuarios con subscripcion</p><p className="text-xs text-slate-500">Mantiene la misma configuracion de visibilidad.</p></div>
+                  <div onClick={() => handleJobToggle("visible_suscripcion")} className={`relative w-12 h-6 rounded-full transition-colors ${jobEditData.visible_suscripcion ? "bg-[#5b83e8]" : "bg-slate-600"}`}>
+                    <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${jobEditData.visible_suscripcion ? "translate-x-6" : "translate-x-0"}`}></div>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <div><p className="text-sm font-bold text-white">Requiere salario pretendido</p><p className="text-xs text-slate-500">Define si el candidato debe informar remuneracion.</p></div>
+                  <div onClick={() => handleJobToggle("requiere_salario")} className={`relative w-12 h-6 rounded-full transition-colors ${jobEditData.requiere_salario ? "bg-[#5b83e8]" : "bg-slate-600"}`}>
+                    <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${jobEditData.requiere_salario ? "translate-x-6" : "translate-x-0"}`}></div>
+                  </div>
+                </label>
+              </div>
+              <div className="sticky bottom-0 bg-surface-dark pt-4 border-t border-slate-800 flex justify-end gap-3 mt-6">
+                <button type="button" onClick={() => setShowJobEditModal(false)} className="px-6 py-3 font-bold text-slate-300 hover:text-white transition-colors">Cancelar</button>
+                <button type="submit" disabled={jobEditSaving} className="bg-[#5b83e8] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#4a6dc6] transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(91,131,232,0.3)]">
+                  {jobEditSaving ? <><span className="material-symbols-outlined animate-spin text-[20px]">sync</span> Guardando</> : <><span className="material-symbols-outlined text-[20px]">save</span> Guardar oferta</>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
+          <div className="relative bg-surface-dark rounded-2xl border border-slate-800 shadow-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto z-10 custom-scrollbar">
+            <button onClick={() => setShowEditModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/50 p-1 rounded-full">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <h3 className="text-2xl font-bold text-white mb-6">Editar mi Información</h3>
+            <form onSubmit={submitEditProfile} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Nombre de la Empresa</label><input required type="text" name="nombre_completo" value={editData.nombre_completo || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Email de Contacto Público</label><input required type="email" name="email" value={editData.email || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Descripción de la Empresa</label><textarea required name="descripcion" rows={4} value={editData.descripcion || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none resize-none"></textarea></div>
+                <div className="md:col-span-2"><label className="block text-sm text-slate-400 mb-1">Teléfono (Ej: +54911223344)</label><input type="tel" name="telefono" value={editData.telefono || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">País</label><input type="text" name="pais" value={editData.pais || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Provincia/Estado</label><input type="text" name="provincia" value={editData.provincia || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Ciudad</label><input type="text" name="ciudad" value={editData.ciudad || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+                <div><label className="block text-sm text-slate-400 mb-1">Dirección Exacta</label><input type="text" name="direccion" value={editData.direccion || ""} onChange={handleEditChange} className="w-full bg-background-dark border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-[#5b83e8] focus:outline-none" /></div>
+              </div>
+              <div className="sticky bottom-0 bg-surface-dark pt-4 border-t border-slate-800 flex justify-end gap-3 mt-6">
+                <button type="button" onClick={() => setShowEditModal(false)} className="px-6 py-3 font-bold text-slate-300 hover:text-white transition-colors">Cancelar</button>
+                <button type="submit" disabled={editSaving} className="bg-[#5b83e8] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#4a6dc6] transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(91,131,232,0.4)]">
+                  {editSaving ? <><span className="material-symbols-outlined animate-spin text-[20px]">sync</span> Guardando</> : <><span className="material-symbols-outlined text-[20px]">save</span> Guardar Cambios</>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

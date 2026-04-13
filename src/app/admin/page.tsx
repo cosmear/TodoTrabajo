@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/sidebars/AdminSidebar";
 
 function approvalBadge(status: string) {
   if (status === "pending") {
@@ -19,13 +20,48 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openJobMenuId, setOpenJobMenuId] = useState<number | null>(null);
+  const [menuDirection, setMenuDirection] = useState<"up" | "down">("down");
+  const [jobMenuDirection, setJobMenuDirection] = useState<"up" | "down">("down");
+  const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
+
+  const showToast = (message: string, type: "error" | "success" = "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleUserMenuToggle = (e: React.MouseEvent, userId: number) => {
+    if (openMenuId === userId) { setOpenMenuId(null); return; }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setMenuDirection(window.innerHeight - rect.bottom < 130 ? "up" : "down");
+    setOpenMenuId(userId);
+  };
+
+  const handleJobMenuToggle = (e: React.MouseEvent, jobId: number) => {
+    if (openJobMenuId === jobId) { setOpenJobMenuId(null); return; }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setJobMenuDirection(window.innerHeight - rect.bottom < 130 ? "up" : "down");
+    setOpenJobMenuId(jobId);
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setOpenMenuId(null);
+    setOpenJobMenuId(null);
+  }, [activeTab]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("tt_session");
+    router.push("/");
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
 
     try {
       const token = localStorage.getItem("tt_session");
@@ -55,77 +91,87 @@ export default function AdminDashboard() {
       setJobs(jobsData.jobs || []);
     } catch (error) {
       console.error(error);
-      setErrorMsg("Error de conexion");
+      if (!silent) setErrorMsg("Error de conexion");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   const updateUserApproval = async (userId: number, approvalStatus: string) => {
+    // Optimistic update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, approval_status: approvalStatus } : u))
+    );
     try {
       const token = localStorage.getItem("tt_session");
-      await fetch("/api/admin/users", {
+      const res = await fetch("/api/admin/users", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ userId, approval_status: approvalStatus }),
       });
-      fetchData();
-    } catch (error) {
-      console.error(error);
+      if (!res.ok) throw new Error();
+    } catch {
+      fetchData(true);
+      showToast("No se pudo actualizar la aprobacion del perfil.");
     }
   };
 
   const toggleUserBan = async (userId: number, currentStatus: number) => {
+    const nextStatus = !currentStatus;
+    // Optimistic update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, is_active: nextStatus ? 1 : 0 } : u))
+    );
     try {
       const token = localStorage.getItem("tt_session");
-      await fetch("/api/admin/users", {
+      const res = await fetch("/api/admin/users", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId, is_active: !currentStatus }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId, is_active: nextStatus }),
       });
-      fetchData();
-    } catch (error) {
-      console.error(error);
+      if (!res.ok) throw new Error();
+    } catch {
+      fetchData(true);
+      showToast("No se pudo actualizar el estado del usuario.");
     }
   };
 
   const updateJobApproval = async (jobId: number, approvalStatus: string) => {
+    // Optimistic update
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? { ...j, approval_status: approvalStatus } : j))
+    );
     try {
       const token = localStorage.getItem("tt_session");
-      await fetch("/api/admin/jobs", {
+      const res = await fetch("/api/admin/jobs", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ jobId, approval_status: approvalStatus }),
       });
-      fetchData();
-    } catch (error) {
-      console.error(error);
+      if (!res.ok) throw new Error();
+    } catch {
+      fetchData(true);
+      showToast("No se pudo actualizar la aprobacion de la oferta.");
     }
   };
 
   const toggleJobStatus = async (jobId: number, currentStatus: number) => {
+    const nextStatus = !currentStatus;
+    // Optimistic update
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? { ...j, is_active: nextStatus ? 1 : 0 } : j))
+    );
     try {
       const token = localStorage.getItem("tt_session");
-      await fetch("/api/admin/jobs", {
+      const res = await fetch("/api/admin/jobs", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ jobId, is_active: !currentStatus }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ jobId, is_active: nextStatus }),
       });
-      fetchData();
-    } catch (error) {
-      console.error(error);
+      if (!res.ok) throw new Error();
+    } catch {
+      fetchData(true);
+      showToast("No se pudo actualizar la visibilidad de la oferta.");
     }
   };
 
@@ -157,58 +203,32 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-dark to-[#0f1618] pt-24 pb-20">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 px-4">
-        <div className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-surface-dark border border-slate-800 rounded-2xl p-6 shadow-2xl sticky top-28">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">
-                admin_panel_settings
-              </span>
-              ADMIN
-            </h2>
-            <div className="space-y-2">
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${
-                  activeTab === "overview"
-                    ? "bg-primary/10 text-primary"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[20px]">dashboard</span>
-                Vista General
-              </button>
-              <button
-                onClick={() => setActiveTab("users")}
-                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${
-                  activeTab === "users"
-                    ? "bg-primary/10 text-primary"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[20px]">group</span>
-                Aprobar Usuarios
-              </button>
-              <button
-                onClick={() => setActiveTab("jobs")}
-                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-bold flex items-center gap-3 ${
-                  activeTab === "jobs"
-                    ? "bg-primary/10 text-primary"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[20px]">work</span>
-                Aprobar Puestos
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-background-dark to-[#0f1618] pt-14 pb-20">
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl border px-5 py-3.5 shadow-2xl text-sm font-bold ${
+            toast.type === "error"
+              ? "border-red-500/30 bg-slate-900 text-red-400"
+              : "border-green-500/30 bg-slate-900 text-green-400"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {toast.type === "error" ? "error" : "check_circle"}
+          </span>
+          {toast.message}
         </div>
+      )}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-start gap-8 px-4">
+        <AdminSidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onLogout={handleLogout}
+        />
 
         <div className="flex-1">
           {activeTab === "overview" && (
             <div className="space-y-6">
-              <h1 className="text-3xl font-extrabold text-white">Vista general</h1>
+              <h1 className="text-3xl font-extrabold text-white mb-6">Vista general</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <div className="bg-surface-dark border border-slate-800 p-6 rounded-2xl">
                   <p className="text-sm text-slate-400 font-bold uppercase tracking-wider">
@@ -259,7 +279,8 @@ export default function AdminDashboard() {
               <h1 className="text-3xl font-extrabold text-white mb-6">
                 Aprobacion de usuarios postulantes
               </h1>
-              <div className="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-lg overflow-x-auto">
+              <div className="bg-surface-dark border border-slate-800 rounded-2xl shadow-lg">
+                <div className="overflow-x-clip">
                 <table className="w-full text-left text-sm text-slate-400">
                   <thead className="text-xs uppercase bg-slate-800/50 text-slate-300">
                     <tr>
@@ -298,37 +319,53 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            {user.tipo_cuenta === "candidato" && (
-                              <button
-                                onClick={() =>
-                                  updateUserApproval(
-                                    user.id,
-                                    user.approval_status === "pending" ? "approved" : "pending"
-                                  )
-                                }
-                                className={`px-3 py-1 rounded text-xs font-bold border transition ${
-                                  user.approval_status === "pending"
-                                    ? "border-green-500/50 text-green-500 hover:bg-green-500/10"
-                                    : "border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                                }`}
-                              >
-                                {user.approval_status === "pending"
-                                  ? "Aprobar"
-                                  : "Marcar pendiente"}
-                              </button>
-                            )}
+                          <div className="relative flex justify-start">
                             {user.tipo_cuenta !== "admin" && (
-                              <button
-                                onClick={() => toggleUserBan(user.id, user.is_active)}
-                                className={`px-3 py-1 rounded text-xs font-bold border transition ${
-                                  user.is_active
-                                    ? "border-red-500/50 text-red-500 hover:bg-red-500/10"
-                                    : "border-green-500/50 text-green-500 hover:bg-green-500/10"
-                                }`}
-                              >
-                                {user.is_active ? "Suspender" : "Reactivar"}
-                              </button>
+                              <>
+                                <button
+                                  onClick={(e) => handleUserMenuToggle(e, user.id)}
+                                  className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                                </button>
+                                {openMenuId === user.id && (
+                                  <div className={`absolute right-0 z-20 w-48 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden ${menuDirection === "up" ? "bottom-full mb-1" : "top-full mt-1"}`}>
+                                    {user.tipo_cuenta === "candidato" && (
+                                      <button
+                                        onClick={() => {
+                                          updateUserApproval(
+                                            user.id,
+                                            user.approval_status === "pending" ? "approved" : "pending"
+                                          );
+                                          setOpenMenuId(null);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-all"
+                                      >
+                                        <span className="material-symbols-outlined text-[16px] text-amber-400">
+                                          {user.approval_status === "pending" ? "verified" : "hourglass_top"}
+                                        </span>
+                                        {user.approval_status === "pending" ? "Aprobar" : "Marcar pendiente"}
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => {
+                                        toggleUserBan(user.id, user.is_active);
+                                        setOpenMenuId(null);
+                                      }}
+                                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-all hover:bg-slate-800 ${
+                                        user.is_active
+                                          ? "text-red-400 hover:text-red-300"
+                                          : "text-green-400 hover:text-green-300"
+                                      }`}
+                                    >
+                                      <span className="material-symbols-outlined text-[16px]">
+                                        {user.is_active ? "person_off" : "restart_alt"}
+                                      </span>
+                                      {user.is_active ? "Suspender" : "Reactivar"}
+                                    </button>
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </td>
@@ -336,6 +373,7 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
@@ -345,7 +383,8 @@ export default function AdminDashboard() {
               <h1 className="text-3xl font-extrabold text-white mb-6">
                 Aprobacion de puestos de trabajo
               </h1>
-              <div className="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-lg overflow-x-auto">
+              <div className="bg-surface-dark border border-slate-800 rounded-2xl shadow-lg">
+                <div className="overflow-x-clip">
                 <table className="w-full text-left text-sm text-slate-400">
                   <thead className="text-xs uppercase bg-slate-800/50 text-slate-300">
                     <tr>
@@ -387,40 +426,55 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-2">
+                          <div className="relative flex justify-start">
                             <button
-                              onClick={() =>
-                                updateJobApproval(
-                                  job.id,
-                                  job.approval_status === "pending" ? "approved" : "pending"
-                                )
-                              }
-                              className={`px-3 py-1 rounded text-xs font-bold border transition ${
-                                job.approval_status === "pending"
-                                  ? "border-green-500/50 text-green-500 hover:bg-green-500/10"
-                                  : "border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                              }`}
+                              onClick={(e) => handleJobMenuToggle(e, job.id)}
+                              className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
                             >
-                              {job.approval_status === "pending"
-                                ? "Aprobar"
-                                : "Marcar pendiente"}
+                              <span className="material-symbols-outlined text-[20px]">more_vert</span>
                             </button>
-                            <button
-                              onClick={() => toggleJobStatus(job.id, job.is_active)}
-                              className={`px-3 py-1 rounded text-xs font-bold border transition ${
-                                job.is_active
-                                  ? "border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
-                                  : "border-green-500/50 text-green-500 hover:bg-green-500/10"
-                              }`}
-                            >
-                              {job.is_active ? "Ocultar" : "Restaurar"}
-                            </button>
+                            {openJobMenuId === job.id && (
+                              <div className={`absolute right-0 z-20 w-52 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl overflow-hidden ${jobMenuDirection === "up" ? "bottom-full mb-1" : "top-full mt-1"}`}>
+                                <button
+                                  onClick={() => {
+                                    updateJobApproval(
+                                      job.id,
+                                      job.approval_status === "pending" ? "approved" : "pending"
+                                    );
+                                    setOpenJobMenuId(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-all"
+                                >
+                                  <span className="material-symbols-outlined text-[16px] text-amber-400">
+                                    {job.approval_status === "pending" ? "verified" : "hourglass_top"}
+                                  </span>
+                                  {job.approval_status === "pending" ? "Aprobar" : "Marcar pendiente"}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    toggleJobStatus(job.id, job.is_active);
+                                    setOpenJobMenuId(null);
+                                  }}
+                                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-all hover:bg-slate-800 ${
+                                    job.is_active
+                                      ? "text-orange-400 hover:text-orange-300"
+                                      : "text-green-400 hover:text-green-300"
+                                  }`}
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">
+                                    {job.is_active ? "visibility_off" : "visibility"}
+                                  </span>
+                                  {job.is_active ? "Ocultar" : "Restaurar"}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}

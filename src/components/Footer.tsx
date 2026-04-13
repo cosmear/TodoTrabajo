@@ -1,6 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  const hideOnPaths = ["/mi-perfil", "/admin"];
+  if (hideOnPaths.some((p) => pathname.startsWith(p))) {
+    return null;
+  }
+
   return (
     <footer className="bg-background-dark pt-12 pb-8 border-t border-slate-800 mt-auto">
       <div className="max-w-7xl mx-auto px-6">
